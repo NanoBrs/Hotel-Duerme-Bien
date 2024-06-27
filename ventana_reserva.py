@@ -89,7 +89,44 @@ class VentanaReserva:
 
         self.cargar_reservas()
         self.reservas_table.bind("<Double-1>", self.cargar_datos_seleccionados)
-        
+    
+    def cargar_estados_reserva(self):
+        estados = ["Pendiente", "Confirmada", "Cancelada"]
+        self.estado_combo['values'] = estados
+
+    def buscar_reserva(self):
+        criterio = self.buscar_var.get().lower()
+        for item in self.reservas_table.get_children():
+            valores = self.reservas_table.item(item, 'values')
+            if any(criterio in str(valor).lower() for valor in valores):
+                self.reservas_table.see(item)
+                self.reservas_table.selection_set(item)
+            else:
+                self.reservas_table.detach(item)
+
+    def cargar_reservas(self):
+        self.reservas_table.delete(*self.reservas_table.get_children())
+        query = """
+        SELECT 
+            r.id_reserva, 
+            r.id_habitacion, 
+            r.id_cliente, 
+            r.fecha_entrada, 
+            r.fecha_salida, 
+            r.estado 
+        FROM reserva r
+        """
+        reservas = self.db.fetch_all(query)
+        if reservas:
+            for reserva in reservas:
+                self.reservas_table.insert('', 'end', text='', values=(
+                    reserva['id_reserva'],
+                    reserva['id_habitacion'],
+                    reserva['id_cliente'],
+                    reserva['fecha_entrada'],
+                    reserva['fecha_salida'],
+                    reserva['estado']
+                ))
         
         
                 
