@@ -71,4 +71,3 @@ class Database:
             return []
         finally:
             self.disconnect_from_db()
-

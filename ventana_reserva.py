@@ -158,4 +158,10 @@ class VentanaReserva:
             self.cargar_reservas()  # Recargar reservas
         except Exception as e:
             messagebox.showerror("Error", str(e))
-    
+            
+            
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.geometry("100x800")  # Ancho de 800 píxeles y alto de 600 píxeles
+    app = VentanaReserva(root)
+    root.mainloop()
