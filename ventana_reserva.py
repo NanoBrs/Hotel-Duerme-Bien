@@ -72,4 +72,90 @@ class VentanaReserva:
         rows = db.fetch_all(query)
         for row in rows:
             self.tree.insert("", "end", values=(row['id_reserva'], row['id_habitacion'], row['id_cliente'], row['fecha_entrada'], row['fecha_salida'], row['estado']))
+            
+    def agregar_reserva(self):
+        id_reserva = self.entry_id_reserva.get()
+        id_habitacion = self.entry_id_habitacion.get()
+        id_cliente = self.entry_id_cliente.get()
+        fecha_entrada = self.entry_fecha_entrada.get()
+        fecha_salida = self.entry_fecha_salida.get()
+        estado = self.entry_estado.get()
+        
+        if not all([id_reserva, id_habitacion, id_cliente, fecha_entrada, fecha_salida, estado]):
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
+            return
+        
+        db = Database()
+        try:
+            db.execute_query("""
+            INSERT INTO reserva (id_reserva, id_cliente, fecha_entrada, fecha_salida, estado)
+            VALUES (%s, %s, %s, %s, %s)
+            """, (id_reserva, id_cliente, fecha_entrada, fecha_salida, estado))
+            
+            db.execute_query("""
+            INSERT INTO detalle_reserva (id_reserva, id_habitacion)
+            VALUES (%s, %s)
+            """, (id_reserva, id_habitacion))
+            
+            messagebox.showinfo("Éxito", "Reserva agregada correctamente")
+            self.tree.delete(*self.tree.get_children())  # Limpiar tabla
+            self.cargar_reservas()  # Recargar reservas
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+    
+    def modificar_reserva(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showerror("Error", "Seleccione una reserva para modificar")
+            return
+        
+        id_reserva = self.entry_id_reserva.get()
+        id_habitacion = self.entry_id_habitacion.get()
+        id_cliente = self.entry_id_cliente.get()
+        fecha_entrada = self.entry_fecha_entrada.get()
+        fecha_salida = self.entry_fecha_salida.get()
+        estado = self.entry_estado.get()
+        
+        if not all([id_reserva, id_habitacion, id_cliente, fecha_entrada, fecha_salida, estado]):
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
+            return
+        
+        db = Database()
+        try:
+            db.execute_query("""
+            UPDATE reserva
+            SET id_cliente = %s, fecha_entrada = %s, fecha_salida = %s, estado = %s
+            WHERE id_reserva = %s
+            """, (id_cliente, fecha_entrada, fecha_salida, estado, id_reserva))
+            
+            db.execute_query("""
+            UPDATE detalle_reserva
+            SET id_habitacion = %s
+            WHERE id_reserva = %s
+            """, (id_habitacion, id_reserva))
+            
+            messagebox.showinfo("Éxito", "Reserva modificada correctamente")
+            self.tree.delete(*self.tree.get_children())  # Limpiar tabla
+            self.cargar_reservas()  # Recargar reservas
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+    
+    def eliminar_reserva(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showerror("Error", "Seleccione una reserva para eliminar")
+            return
+        
+        id_reserva = self.tree.item(selected_item)["values"][0]
+        
+        db = Database()
+        try:
+            db.execute_query("DELETE FROM detalle_reserva WHERE id_reserva = %s", (id_reserva,))
+            db.execute_query("DELETE FROM reserva WHERE id_reserva = %s", (id_reserva,))
+            
+            messagebox.showinfo("Éxito", "Reserva eliminada correctamente")
+            self.tree.delete(*self.tree.get_children())  # Limpiar tabla
+            self.cargar_reservas()  # Recargar reservas
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
     

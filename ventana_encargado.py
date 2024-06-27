@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from gestion_habitacion import HabitacionCRUD 
+from ventana_reserva import VentanaReserva
 
 class VentanaEncargado:
     def __init__(self, master):
@@ -59,8 +60,16 @@ class VentanaEncargado:
         messagebox.showinfo("Gestionar Huéspedes", "Funcionalidad para gestionar huéspedes.")
 
     def gestionar_reservas(self):
-        messagebox.showinfo("Gestionar Reservas", "Funcionalidad para gestionar reservas.")
+                # Minimizar la ventana principal
+        self.master.iconify()
 
+        # Crear una nueva ventana para gestionar habitaciones
+        new_window = tk.Toplevel(self.master)
+        new_window.title("Gestión de Reservas")
+        new_window.geometry("1000x800")
+
+        # Instancia de la clase HabitacionCRUD
+        VentanaReserva(new_window)
     def salir(self):
         self.master.quit()  # Cierra el bucle principal de Tkinter
         print("Saliendo del programa, gracias por preferirnos...")
