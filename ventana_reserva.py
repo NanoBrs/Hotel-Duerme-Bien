@@ -55,5 +55,42 @@ class VentanaReserva:
 
         self.cargar_estados_reserva()
         
+        #cuadro para la tabla de reservas
+        table_frame = ttk.Frame(self.master)
+        table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        
+        self.reservas_table = ttk.Treeview(
+            table_frame, 
+            columns=('ID', 'ID Habitación', 'ID Cliente', 'Fecha Entrada', 'Fecha Salida', 'Estado'),
+            show='headings',
+            height=8
+        )
+        
+        
+        self.reservas_table.heading('ID', text='ID')
+        self.reservas_table.heading('ID Habitación', text='ID de Habitación')
+        self.reservas_table.heading('ID Cliente', text='ID de Cliente')
+        self.reservas_table.heading('Fecha Entrada', text='Fecha de Entrada')
+        self.reservas_table.heading('Fecha Salida', text='Fecha de Salida')
+        self.reservas_table.heading('Estado', text='Estado')
+
+        self.reservas_table.column('ID', width=50)
+        self.reservas_table.column('ID Habitación', width=120)
+        self.reservas_table.column('ID Cliente', width=100)
+        self.reservas_table.column('Fecha Entrada', width=100)
+        self.reservas_table.column('Fecha Salida', width=100)
+        self.reservas_table.column('Estado', width=100)
+
+        self.reservas_table.pack(fill=tk.BOTH, expand=True)
+
+        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.reservas_table.yview)
+        self.reservas_table.configure(yscroll=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.cargar_reservas()
+        self.reservas_table.bind("<Double-1>", self.cargar_datos_seleccionados)
+        
+        
+        
                 
         pass
