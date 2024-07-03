@@ -1,4 +1,4 @@
-from database import Database
+from DAO.database import Database
 
 class DAO_habitaciones:
     def __init__(self):

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database import Database
+from DAO.database import Database
 
 class Login(tk.Frame):
     def __init__(self, parent, controlador):
