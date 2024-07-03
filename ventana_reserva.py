@@ -10,10 +10,10 @@ class VentanaReserva:
         self.master.geometry("1000x800")
         
         # Crear los widgets de la ventana de reserva
-        self.label_rut = tk.Label(master, text="RUT:")
-        self.label_rut.grid(row=0, column=0)
-        self.entry_rut = tk.Entry(master)
-        self.entry_rut.grid(row=0, column=1)
+        self.label_id_usuario = tk.Label(master, text="ID Usuario:")
+        self.label_id_usuario.grid(row=0, column=0)
+        self.entry_id_usuario = tk.Entry(master)
+        self.entry_id_usuario.grid(row=0, column=1)
         
         self.label_fecha_llegada = tk.Label(master, text="Fecha de Llegada:")
         self.label_fecha_llegada.grid(row=1, column=0)
@@ -22,7 +22,6 @@ class VentanaReserva:
         
         self.label_fecha_salida = tk.Label(master, text="Fecha de Salida:")
         self.label_fecha_salida.grid(row=2, column=0)
-        self.entry_fecha_salida = tk.Entry(master)
         self.entry_fecha_salida.grid(row=2, column=1)
 
         self.label_tipo_habitacion = tk.Label(master, text="Tipo de Habitación:")
@@ -50,8 +49,8 @@ class VentanaReserva:
         self.button_eliminar.grid(row=5, column=3)
         
         # Tabla para mostrar las reservas
-        self.tree = ttk.Treeview(master, columns=("RUT", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"), show="headings")
-        self.tree.heading("RUT", text="RUT")
+        self.tree = ttk.Treeview(master, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"), show="headings")
+        self.tree.heading("ID Usuario", text="ID Usuario")
         self.tree.heading("Fecha de Llegada", text="Fecha de Llegada")
         self.tree.heading("Fecha de Salida", text="Fecha de Salida")
         self.tree.heading("Tipo de Habitación", text="Tipo de Habitación")
@@ -63,22 +62,23 @@ class VentanaReserva:
     
     def cargar_tipos_habitacion(self):
         db = Database()
-        query = "SELECT id_tipo_habitacion, nombre FROM tipo_habitacion"
+        query = "SELECT id_tipo_habitacion, tipo FROM tipo_habitacion"
         rows = db.fetch_all(query)
-        tipos = {row['id_tipo_habitacion']: row['nombre'] for row in rows}
+        tipos = {row['id_tipo_habitacion']: row['tipo'] for row in rows}
         self.tipo_habitacion_dict = tipos
         self.combo_tipo_habitacion['values'] = list(tipos.values())
 
     def cargar_reservas(self):
         db = Database()
         query = """
-        SELECT r.rut, r.fecha_llegada, r.fecha_salida, th.nombre as tipo_habitacion, r.precio_total
+        SELECT r.id_usuario, r.fecha_llegada, r.fecha_salida, th.tipo as tipo_habitacion, r.precio_total
         FROM reserva r
-        JOIN tipo_habitacion th ON r.id_tipo_habitacion = th.id_tipo_habitacion
+        JOIN habitacion h ON r.id_habitacion = h.id_habitacion
+        JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
         """
         rows = db.fetch_all(query)
         for row in rows:
-            self.tree.insert("", "end", values=(row['rut'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total']))
+            self.tree.insert("", "end", values=(row['id_usuario'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total']))
     
     def calcular_total(self):
         fecha_llegada = self.entry_fecha_llegada.get()
@@ -117,13 +117,13 @@ class VentanaReserva:
             messagebox.showerror("Error", "No se encontró el tipo de habitación seleccionado")
 
     def agregar_reserva(self):
-        rut = self.entry_rut.get()
+        id_usuario = self.entry_id_usuario.get()
         fecha_llegada = self.entry_fecha_llegada.get()
         fecha_salida = self.entry_fecha_salida.get()
         tipo_habitacion = self.combo_tipo_habitacion.get()
         precio_total = self.entry_precio_total.get()
 
-        if not all([rut, fecha_llegada, fecha_salida, tipo_habitacion, precio_total]):
+        if not all([id_usuario, fecha_llegada, fecha_salida, tipo_habitacion, precio_total]):
             messagebox.showerror("Error", "Todos los campos son obligatorios")
             return
         
@@ -132,9 +132,9 @@ class VentanaReserva:
         db = Database()
         try:
             db.execute_query("""
-            INSERT INTO reserva (rut, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total)
+            INSERT INTO reserva (id_usuario, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total)
             VALUES (%s, %s, %s, %s, %s)
-            """, (rut, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total))
+            """, (id_usuario, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total))
 
             messagebox.showinfo("Éxito", "Reserva agregada correctamente")
             self.tree.delete(*self.tree.get_children())  # Limpiar tabla
@@ -148,13 +148,13 @@ class VentanaReserva:
             messagebox.showerror("Error", "Seleccione una reserva para modificar")
             return
 
-        rut = self.entry_rut.get()
+        id_usuario = self.entry_id_usuario.get()
         fecha_llegada = self.entry_fecha_llegada.get()
         fecha_salida = self.entry_fecha_salida.get()
         tipo_habitacion = self.combo_tipo_habitacion.get()
         precio_total = self.entry_precio_total.get()
 
-        if not all([rut, fecha_llegada, fecha_salida, tipo_habitacion, precio_total]):
+        if not all([id_usuario, fecha_llegada, fecha_salida, tipo_habitacion, precio_total]):
             messagebox.showerror("Error", "Todos los campos son obligatorios")
             return
         
@@ -165,9 +165,9 @@ class VentanaReserva:
         try:
             db.execute_query("""
             UPDATE reserva
-            SET rut = %s, fecha_llegada = %s, fecha_salida = %s, id_tipo_habitacion = %s, precio_total = %s
+            SET id_usuario = %s, fecha_llegada = %s, fecha_salida = %s, id_tipo_habitacion = %s, precio_total = %s
             WHERE id_reserva = %s
-            """, (rut, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total, reserva_id))
+            """, (id_usuario, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total, reserva_id))
 
             messagebox.showinfo("Éxito", "Reserva modificada correctamente")
             self.tree.delete(*self.tree.get_children())  # Limpiar tabla
@@ -196,4 +196,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = VentanaReserva(root)
     root.mainloop()
-
