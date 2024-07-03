@@ -1,18 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from database import Database
-from ventana_administrador import VentanaAdministrador
-from ventana_encargado import VentanaEncargado
 
-class LoginWindow:
-    def __init__(self, master):
-        self.master = master
-        self.master.title("Login")
-        self.master.geometry("720x480")
+class Login(tk.Frame):
+    def __init__(self, parent, controlador):
+        tk.Frame.__init__(self, parent)
+        self.controlador = controlador
         
         # Agregar imagen de fondo
-        self.background_image = tk.PhotoImage(file="img/login.png")
-        self.background_label = tk.Label(master, image=self.background_image)
+        self.background_image = tk.PhotoImage(file="img/loginV2.png")
+        self.background_label = tk.Label(self, image=self.background_image)
         self.background_label.place(relwidth=1, relheight=1)
         
         # Configuración de estilos
@@ -22,7 +19,7 @@ class LoginWindow:
         style.map("rounded.TButton", background=[('active', 'blue')])
         
         # Barra de menú
-        self.menubar = tk.Menu(master)
+        self.menubar = tk.Menu(self)
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
         self.file_menu.add_command(label="Salir", command=self.quit_app)
         
@@ -34,18 +31,18 @@ class LoginWindow:
         self.menubar.add_cascade(label="Archivo", menu=self.file_menu)
         self.menubar.add_cascade(label="Ayuda", menu=self.help_menu)
         
-        master.config(menu=self.menubar)
+        controlador.config(menu=self.menubar)
         
         # Entradas de usuario y contraseña
-        self.entry_user = ttk.Entry(master, style="rounded_entry.TEntry")
-        self.entry_user.place(x=48, y=190.6)
+        self.entry_user = ttk.Entry(self, style="rounded_entry.TEntry")
+        self.entry_user.place(x=115, y=250)
         
-        self.entry_password = ttk.Entry(master, show='*', style="rounded_entry.TEntry")
-        self.entry_password.place(x=48, y=271)
+        self.entry_password = ttk.Entry(self, show='*', style="rounded_entry.TEntry")
+        self.entry_password.place(x=115, y=323)
         
         # Botón de Login
-        self.login_button = ttk.Button(master, text="Ingresar", command=self.on_login, style="rounded.TButton")
-        self.login_button.place(x=55, y=338.4)
+        self.login_button = ttk.Button(self, text="Ingresar", command=self.on_login, style="rounded.TButton")
+        self.login_button.place(x=215, y=370.4)
     
     def login(self, user, password):
         db = Database()
@@ -63,15 +60,13 @@ class LoginWindow:
         user_data = self.login(user, password)
         
         if user_data:
-            self.master.withdraw()  # Oculta la ventana de login en lugar de destruirla
+            
             messagebox.showinfo("Éxito", "Inicio de sesión exitoso")
             
             if user_data["id_rol_usuario"] == 1:
-                admin_window = tk.Toplevel(self.master)
-                VentanaAdministrador(admin_window)
+                self.controlador.mostrar_frame("VentanaEncargado")
             elif user_data["id_rol_usuario"] == 2:
-                encargado_window = tk.Toplevel(self.master)
-                VentanaEncargado(encargado_window)
+                self.controlador.mostrar_frame("GestionHabitaciones")
             
             print(f"Usuario {user_data['nombre']} ha iniciado sesión correctamente.")
         else:
@@ -85,14 +80,14 @@ class LoginWindow:
     
     def open_termin(self):
         # Abrir ventana de términos y condiciones
-        terminos_window = tk.Toplevel(self.master)
+        terminos_window = tk.Toplevel(self)
         TerminosCondicionesWindow(terminos_window)
     
     def quit_app(self):
-        self.master.quit()
+        self.controlador.quit()
     
     def destroy_app(self):
-        self.master.destroy()
+        self.controlador.destroy()
 
 class TerminosCondicionesWindow:
     def __init__(self, master):
@@ -126,5 +121,3 @@ class TerminosCondicionesWindow:
         except FileNotFoundError:
             messagebox.showerror("Error", "No se encontró el archivo de términos y condiciones.")
             self.master.destroy()
-
-

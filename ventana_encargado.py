@@ -1,68 +1,53 @@
 import tkinter as tk
-from tkinter import messagebox
-from gestion_habitacion import HabitacionCRUD 
+from tkinter import ttk
 
-class VentanaEncargado:
-    def __init__(self, master):
-        self.master = master
-        self.master.title("Ventana del Encargado")
-        self.master.geometry("720x480")
+class VentanaEncargado(tk.Frame):
+    def __init__(self, parent, controlador):
+        tk.Frame.__init__(self, parent)
+        self.controlador = controlador
 
-        # Crear un canvas para la imagen de fondo y los botones
-        self.canvas = tk.Canvas(master, width=720, height=480)
-        self.canvas.pack(fill="both", expand=True)
-
-        # Cargar y agregar imagen de fondo
+        # Agregar imagen de fondo
         self.background_image = tk.PhotoImage(file="img/Menu.png")
-        self.canvas.create_image(0, 0, image=self.background_image, anchor="nw")
+        self.background_label = tk.Label(self, image=self.background_image)
+        self.background_label.place(relwidth=1, relheight=1)
 
-        # Estilo de los botones para hacerlos más grandes y con borde negro
-        button_style = {
-            "bg": "white", 
-            "fg": "black", 
-            "relief": "solid", 
-            "bd": 2,  # Borde de 2 píxeles
-            "width": 25,  # Ancho del botón
-            "height": 2,  # Alto del botón
-            "font": ("Helvetica", 12)
-        }
+        # Configuración de estilos
+        style = ttk.Style()
+        style.configure("rounded.TButton", borderwidth=2, relief="solid", background="white", padding=10, font=('Helvetica', 12))
+        style.map("rounded.TButton", background=[('active', 'lightgray')])
 
         # Botón Gestionar Habitaciones
-        self.boton_gestionar_habitaciones = tk.Button(master, text="Gestionar Habitaciones", command=self.gestionar_habitaciones, **button_style)
-        self.canvas.create_window(360, 150, window=self.boton_gestionar_habitaciones, anchor="center")
+        self.boton_gestionar_habitaciones = ttk.Button(self, text="Gestionar Habitaciones", command=self.mostrar_gestion_habitaciones, style="rounded.TButton")
+        self.boton_gestionar_habitaciones.place(x=300, y=150, width=360, height=40)
 
         # Botón Gestionar Huéspedes
-        self.boton_gestionar_huespedes = tk.Button(master, text="Gestionar Huéspedes", command=self.gestionar_huespedes, **button_style)
-        self.canvas.create_window(360, 220, window=self.boton_gestionar_huespedes, anchor="center")
+        self.boton_gestionar_huespedes = ttk.Button(self, text="Gestionar Huéspedes", command=self.mostrar_gestion_huespedes, style="rounded.TButton")
+        self.boton_gestionar_huespedes.place(x=300, y=210, width=360, height=40)
 
         # Botón Gestionar Reservas
-        self.boton_gestionar_reservas = tk.Button(master, text="Gestionar Reservas", command=self.gestionar_reservas, **button_style)
-        self.canvas.create_window(360, 290, window=self.boton_gestionar_reservas, anchor="center")
+        self.boton_gestionar_reservas = ttk.Button(self, text="Gestionar Reservas", command=self.mostrar_gestion_reservas, style="rounded.TButton")
+        self.boton_gestionar_reservas.place(x=300, y=270, width=360, height=40)
 
-        # Botón Salir
-        self.boton_salir = tk.Button(master, text="Salir", command=self.salir, **button_style)
-        self.canvas.create_window(360, 360, window=self.boton_salir, anchor="center")
+        # Botón Cerrar Sesión
+        self.boton_cerrar_sesion = ttk.Button(self, text="Cerrar Sesión", command=self.cerrar_sesion, style="rounded.TButton")
+        self.boton_cerrar_sesion.place(x=300, y=330, width=360, height=40)
 
-    def gestionar_habitaciones(self):
-        # Minimizar la ventana principal
-        self.master.iconify()
+    def mostrar_gestion_habitaciones(self):
+        self.controlador.mostrar_frame("GestionHabitaciones")
 
-        # Crear una nueva ventana para gestionar habitaciones
-        new_window = tk.Toplevel(self.master)
-        new_window.title("Gestión de Habitaciones")
-        new_window.geometry("1000x480")
+    def mostrar_gestion_huespedes(self):
+        self.controlador.mostrar_frame("GestionClientes")
 
-        # Instancia de la clase HabitacionCRUD
-        HabitacionCRUD(new_window)
+    def mostrar_gestion_reservas(self):
+        self.controlador.mostrar_frame("GestionReservas")
 
-    def gestionar_huespedes(self):
-        messagebox.showinfo("Gestionar Huéspedes", "Funcionalidad para gestionar huéspedes.")
-
-    def gestionar_reservas(self):
-        messagebox.showinfo("Gestionar Reservas", "Funcionalidad para gestionar reservas.")
-
-    def salir(self):
-        self.master.quit()  # Cierra el bucle principal de Tkinter
-        print("Saliendo del programa, gracias por preferirnos...")
-        self.master.destroy()  # Destruye la ventana principal
-
+    def cerrar_sesion(self):
+        # Aquí deberías implementar la lógica para cerrar la sesión actual
+        # Puedes mostrar un mensaje, limpiar datos de sesión, etc.
+        print("Sesión cerrada exitosamente.")
+        # Luego, probablemente quieras volver a la ventana de inicio de sesión o cerrar la aplicación
+        # Por ejemplo:
+        self.controlador.mostrar_frame("Login")  # Cambiar a la ventana de inicio de sesión
+        # O si deseas cerrar la aplicación:
+        # self.controlador.quit()  # Cierra el bucle principal de Tkinter
+        # self.controlador.destroy()  # Destruye la ventana principal

@@ -1,16 +1,16 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database import Database  # Importa la clase Database desde tu archivo database.py
+from DAO.DAO_habitaciones import DAO_habitaciones  # Importa la clase DAO_habitaciones desde tu archivo DAO_habitaciones.py
 from PIL import Image, ImageTk
+import tkinter as tk
 
-class HabitacionCRUD:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Gestión de Habitaciones")
-        self.root.geometry("1000x480")
+class GestionHabitaciones(tk.Frame):
+    def __init__(self, parent, controlador):
+        tk.Frame.__init__(self, parent)
+        self.controlador = controlador
 
-        # Instancia de Database
-        self.db = Database()
+        # Instancia de DAO_habitaciones
+        self.dao = DAO_habitaciones()
       
         # Variables para campos de entrada
         self.id_habitacion_var = tk.StringVar()
@@ -25,10 +25,10 @@ class HabitacionCRUD:
         self.buscar_var = tk.StringVar()
 
         # Frame para el formulario de ingreso y edición
-        form_frame = ttk.Frame(self.root, padding=(20, 10))
+        form_frame = ttk.Frame(self, padding=(20, 10))
         form_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
-          # Cargar la imagen de fondo
+        # Cargar la imagen de fondo
         self.bg_image = Image.open("img/Habitacion.png")
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
         
@@ -82,13 +82,16 @@ class HabitacionCRUD:
         ttk.Button(form_frame, text="Modificar", command=self.modificar_habitacion).place(x=445, y=160)
         ttk.Button(form_frame, text="Eliminar", command=self.eliminar_habitacion).place(x=535, y=160)
 
+        ttk.Button(self, text="Volver al Menú del Encargado", command=self.volver_menu_encargado).place(x=750,y=500)
+        
+
         self.cargar_tipos_habitacion()
         self.cargar_orientaciones()
         self.cargar_estados_habitacion()
-
+    
         # Frame para la tabla de habitaciones
 
-        table_frame = ttk.Frame(self.root)
+        table_frame = ttk.Frame(self)
         table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         table_frame.place(x=5, y=250)
         self.habitaciones_table = ttk.Treeview(
@@ -99,7 +102,6 @@ class HabitacionCRUD:
         )
 
         # Tabla de habitaciones
-        #self.habitaciones_table = ttk.Treeview(table_frame, columns=('ID', 'Numero', 'Precio', 'Camas', 'Piso', 'Capacidad', 'Tipo', 'Orientacion', 'Estado'))
         self.habitaciones_table.heading('#0', text='')  # Dejamos el encabezado de la columna #0 vacío
         self.habitaciones_table.heading('ID', text='ID')
         self.habitaciones_table.heading('Numero', text='Número de Habitación')
@@ -128,16 +130,16 @@ class HabitacionCRUD:
         scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.habitaciones_table.yview)
         self.habitaciones_table.configure(yscroll=scrollbar.set)
         scrollbar.grid(row=0, column=1, sticky='ns')
+
         # Cargar datos iniciales de la tabla
         self.cargar_habitaciones()
 
         self.habitaciones_table.bind("<Double-1>", self.cargar_datos_seleccionados) #Evento doble click que carga los datos en la tabla
 
-
-    
+    def volver_menu_encargado(self):
+        self.controlador.mostrar_frame("VentanaEncargado")
     def cargar_estados_habitacion(self):
-        query = "SELECT estado FROM estado_habitacion"
-        estados = self.db.fetch_all(query)
+        estados = self.dao.cargar_estados_habitacion()
         if estados:
             self.estado_habitacion_combo['values'] = [estado['estado'] for estado in estados]
 
@@ -152,157 +154,82 @@ class HabitacionCRUD:
                 self.habitaciones_table.detach(item)
 
     def cargar_tipos_habitacion(self):
-        query = "SELECT tipo FROM tipo_habitacion"
-        tipos = self.db.fetch_all(query)
+        tipos = self.dao.cargar_tipos_habitacion()
         if tipos:
             self.tipo_habitacion_combo['values'] = [tipo['tipo'] for tipo in tipos]
 
     def cargar_orientaciones(self):
-        query = "SELECT orientacion FROM orientacion"
-        orientaciones = self.db.fetch_all(query)
+        orientaciones = self.dao.cargar_orientaciones()
         if orientaciones:
             self.orientacion_combo['values'] = [orientacion['orientacion'] for orientacion in orientaciones]
 
     def cargar_habitaciones(self):
-        self.habitaciones_table.delete(*self.habitaciones_table.get_children())
-        query = """
-        SELECT 
-            h.id_habitacion, 
-            h.numero_habitacion, 
-            h.precio_noche, 
-            h.camas, 
-            h.piso, 
-            h.capacidad, 
-            th.tipo, 
-            o.orientacion, 
-            eh.estado 
-        FROM habitacion h
-        JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
-        JOIN orientacion o ON h.id_orientacion = o.id_orientacion
-        JOIN estado_habitacion eh ON h.id_estado_habitacion = eh.id_estado_habitacion
-        """
-        habitaciones = self.db.fetch_all(query)
+        for item in self.habitaciones_table.get_children():
+            self.habitaciones_table.delete(item)
+        habitaciones = self.dao.cargar_habitaciones()
         if habitaciones:
             for habitacion in habitaciones:
-                self.habitaciones_table.insert('', 'end', text='', values=(
-                    habitacion['id_habitacion'],
-                    habitacion['numero_habitacion'],
-                    habitacion['precio_noche'],
-                    habitacion['camas'],
-                    habitacion['piso'],
-                    habitacion['capacidad'],
-                    habitacion['tipo'],
-                    habitacion['orientacion'],
+                self.habitaciones_table.insert('', tk.END, values=(
+                    habitacion['id_habitacion'], 
+                    habitacion['numero_habitacion'], 
+                    habitacion['precio_noche'], 
+                    habitacion['camas'], 
+                    habitacion['piso'], 
+                    habitacion['capacidad'], 
+                    habitacion['tipo'], 
+                    habitacion['orientacion'], 
                     habitacion['estado']
                 ))
 
-
-        
-    def cargar_datos_seleccionados(self, event):
-        item = self.habitaciones_table.selection()[0]
-        habitacion = self.habitaciones_table.item(item, 'values')
-        
-        self.id_habitacion_var.set(habitacion[0])  # ID de la habitación
-        self.numero_habitacion_var.set(habitacion[1])  # Número de habitación
-        self.precio_noche_var.set(habitacion[2])  # Precio por noche
-        self.camas_var.set(habitacion[3])  # Camas
-        self.piso_var.set(habitacion[4])  # Piso
-        self.capacidad_var.set(habitacion[5])  # Capacidad
-        self.tipo_habitacion_var.set(habitacion[6])  # Tipo de habitación
-        self.orientacion_var.set(habitacion[7])  # Orientación
-        self.estado_habitacion_var.set(habitacion[8])  # Estado de habitación
-
-    def limpiar_campos(self):
-        self.id_habitacion_var.set('')  # ID de la habitación
-        self.numero_habitacion_var.set('')
-        self.precio_noche_var.set(0.0)
-        self.camas_var.set(0)
-        self.piso_var.set(0)
-        self.capacidad_var.set(0)
-        self.tipo_habitacion_var.set('')
-        self.orientacion_var.set('')
-        self.estado_habitacion_var.set('')
-
     def agregar_habitacion(self):
-        numero_habitacion = self.numero_habitacion_var.get()
-        precio_noche = self.precio_noche_var.get()
-        camas = self.camas_var.get()
-        piso = self.piso_var.get()
-        capacidad = self.capacidad_var.get()
-        tipo_habitacion = self.tipo_habitacion_combo.get()
-        orientacion = self.orientacion_combo.get()
-        estado_habitacion = self.estado_habitacion_combo.get()
-
-        if not (numero_habitacion and tipo_habitacion and orientacion and estado_habitacion):
-            messagebox.showwarning("Campos requeridos", "Por favor complete los campos obligatorios.")
-            return
-
-        query = """
-        INSERT INTO habitacion 
-        (numero_habitacion, precio_noche, camas, piso, capacidad, id_tipo_habitacion, id_orientacion, id_estado_habitacion) 
-        VALUES 
-        (%s, %s, %s, %s, %s, 
-        (SELECT id_tipo_habitacion FROM tipo_habitacion WHERE tipo = %s), 
-        (SELECT id_orientacion FROM orientacion WHERE orientacion = %s), 
-        (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s))
-        """
-        params = (numero_habitacion, precio_noche, camas, piso, capacidad, tipo_habitacion, orientacion, estado_habitacion)
-
-        if self.db.execute_query(query, params):
-            messagebox.showinfo("Habitación agregada", "La habitación se agregó correctamente.")
-            self.cargar_habitaciones()
-            self.limpiar_campos()
+        params = (
+            self.numero_habitacion_var.get(),
+            self.precio_noche_var.get(),
+            self.camas_var.get(),
+            self.piso_var.get(),
+            self.capacidad_var.get(),
+            self.tipo_habitacion_var.get(),
+            self.orientacion_var.get(),
+            self.estado_habitacion_var.get()
+        )
+        self.dao.agregar_habitacion(params)
+        self.cargar_habitaciones()
 
     def modificar_habitacion(self):
-        numero_habitacion = self.numero_habitacion_var.get()
-        precio_noche = self.precio_noche_var.get()
-        camas = self.camas_var.get()
-        piso = self.piso_var.get()
-        capacidad = self.capacidad_var.get()
-        tipo_habitacion = self.tipo_habitacion_combo.get()
-        orientacion = self.orientacion_combo.get()
-        estado_habitacion = self.estado_habitacion_combo.get()
-
-        if not (numero_habitacion and tipo_habitacion and orientacion and estado_habitacion):
-            messagebox.showwarning("Campos requeridos", "Por favor complete los campos obligatorios.")
-            return
-
-        query = """
-        UPDATE habitacion 
-        SET 
-            precio_noche = %s, 
-            camas = %s, 
-            piso = %s, 
-            capacidad = %s, 
-            id_tipo_habitacion = (SELECT id_tipo_habitacion FROM tipo_habitacion WHERE tipo = %s), 
-            id_orientacion = (SELECT id_orientacion FROM orientacion WHERE orientacion = %s), 
-            id_estado_habitacion = (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s)
-        WHERE numero_habitacion = %s
-        """
-        params = (precio_noche, camas, piso, capacidad, tipo_habitacion, orientacion, estado_habitacion, numero_habitacion)
-
-        if self.db.execute_query(query, params):
-            messagebox.showinfo("Habitación modificada", "La habitación se modificó correctamente.")
-            self.cargar_habitaciones()
-            self.limpiar_campos()
+        params = (
+            self.precio_noche_var.get(),
+            self.camas_var.get(),
+            self.piso_var.get(),
+            self.capacidad_var.get(),
+            self.tipo_habitacion_var.get(),
+            self.orientacion_var.get(),
+            self.estado_habitacion_var.get(),
+            self.numero_habitacion_var.get()
+        )
+        self.dao.modificar_habitacion(params)
+        self.cargar_habitaciones()
 
     def eliminar_habitacion(self):
-        numero_habitacion = self.numero_habitacion_var.get()
+        params = (self.numero_habitacion_var.get(),)
+        self.dao.eliminar_habitacion(params)
+        self.cargar_habitaciones()
 
-        if not numero_habitacion:
-            messagebox.showwarning("Campo requerido", "Por favor ingrese el número de habitación para eliminar.")
-            return
-
-        query = "DELETE FROM habitacion WHERE numero_habitacion = %s"
-        params = (numero_habitacion,)
-
-        if self.db.execute_query(query, params):
-            messagebox.showinfo("Habitación eliminada", "La habitación se eliminó correctamente.")
-            self.cargar_habitaciones()
-            self.limpiar_campos()
+    def cargar_datos_seleccionados(self, event):
+        selected_item = self.habitaciones_table.focus()
+        if selected_item:
+            item_data = self.habitaciones_table.item(selected_item)
+            values = item_data['values']
+            self.id_habitacion_var.set(values[0])
+            self.numero_habitacion_var.set(values[1])
+            self.precio_noche_var.set(values[2])
+            self.camas_var.set(values[3])
+            self.piso_var.set(values[4])
+            self.capacidad_var.set(values[5])
+            self.tipo_habitacion_var.set(values[6])
+            self.orientacion_var.set(values[7])
+            self.estado_habitacion_var.set(values[8])
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry("100x800")  # Ancho de 800 píxeles y alto de 600 píxeles
-    app = HabitacionCRUD(root)
+    app = GestionHabitaciones(root)
     root.mainloop()
