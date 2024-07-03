@@ -1,4 +1,5 @@
 from DAO.database import Database
+from tkinter import ttk, messagebox
 
 class DAO_habitaciones:
     def __init__(self):
@@ -48,6 +49,11 @@ class DAO_habitaciones:
         return self.db.execute_query(query, params)
 
     def modificar_habitacion(self, params):
+        id_habitacion = params[-1]  # Último parámetro es el ID de la habitación
+        if not self.validar_existencia_habitacion(id_habitacion):
+            messagebox.showerror("Error", f"No existe una habitación con ID: {id_habitacion}")
+            return False
+        
         query = """
         UPDATE habitacion 
         SET 
@@ -57,11 +63,30 @@ class DAO_habitaciones:
             capacidad = %s, 
             id_tipo_habitacion = (SELECT id_tipo_habitacion FROM tipo_habitacion WHERE tipo = %s), 
             id_orientacion = (SELECT id_orientacion FROM orientacion WHERE orientacion = %s), 
-            id_estado_habitacion = (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s)
-        WHERE numero_habitacion = %s
+            id_estado_habitacion = (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s),
+            numero_habitacion = %s
+        WHERE id_habitacion = %s
         """
+        mensaje = f"Se ha modificado la habitación de ID: {id_habitacion}"
+        messagebox.showinfo("Información", mensaje)
         return self.db.execute_query(query, params)
 
-    def eliminar_habitacion(self, params):
-        query = "DELETE FROM habitacion WHERE numero_habitacion = %s"
-        return self.db.execute_query(query, params)
+
+    def eliminar_habitacion(self, id):
+        query = "DELETE FROM habitacion WHERE id_habitacion = %s"
+        try:
+            print(self.db.execute_query(query, id))
+            messagebox.showwarning("Eliminado", "Se eliminó la habitación de id:",id)
+        except:
+            messagebox.showerror("Error", "No se pudo eliminar la habitación")
+        return self.db.execute_query(query, id)
+    
+    def validar_existencia_habitacion(self, id_habitacion):
+        query = "SELECT COUNT(*) as count FROM habitacion WHERE id_habitacion = %s"
+        result = self.db.fetch_one(query, (id_habitacion,))
+        
+        if result is not None and 'count' in result and result['count'] > 0:
+            return True
+        else:
+            return False
+

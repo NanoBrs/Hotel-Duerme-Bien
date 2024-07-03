@@ -2,16 +2,20 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from DAO.DAO_habitaciones import DAO_habitaciones  # Importa la clase DAO_habitaciones desde tu archivo DAO_habitaciones.py
 from PIL import Image, ImageTk
-import tkinter as tk
 
 class GestionHabitaciones(tk.Frame):
     def __init__(self, parent, controlador):
         tk.Frame.__init__(self, parent)
         self.controlador = controlador
 
+        # Agregar imagen de fondo
+        self.background_image = tk.PhotoImage(file="img/MENU2.png")
+        self.background_label = tk.Label(self, image=self.background_image)
+        self.background_label.place(relwidth=1, relheight=1)
+
         # Instancia de DAO_habitaciones
         self.dao = DAO_habitaciones()
-      
+
         # Variables para campos de entrada
         self.id_habitacion_var = tk.StringVar()
         self.numero_habitacion_var = tk.StringVar()
@@ -26,18 +30,11 @@ class GestionHabitaciones(tk.Frame):
 
         # Frame para el formulario de ingreso y edición
         form_frame = ttk.Frame(self, padding=(20, 10))
-        form_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
-        # Cargar la imagen de fondo
-        self.bg_image = Image.open("img/Habitacion.png")
-        self.bg_photo = ImageTk.PhotoImage(self.bg_image)
-        
-        # Crear un Label para la imagen de fondo
-        self.bg_label = tk.Label(form_frame, image=self.bg_photo)
-        self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+        form_frame.place(x=11.4, y=84.6, width=975.8, height=300)  # Ajustado para la mitad superior del área deseada
 
         # Campos de entrada
         # Primera columna
+        ttk.Label(form_frame, text="GESTION DE HABITACIONES").place(x=5, y=10)
         ttk.Label(form_frame, text="ID de Habitación:").place(x=5, y=40)
         ttk.Entry(form_frame, textvariable=self.id_habitacion_var, state="readonly").place(x=150, y=40)
 
@@ -70,7 +67,6 @@ class GestionHabitaciones(tk.Frame):
         self.estado_habitacion_combo.place(x=475, y=130)
 
         # Campo de búsqueda
-
         ttk.Label(form_frame, text="BUSQUEDA:").place(x=5, y=190)
         ttk.Entry(form_frame, textvariable=self.buscar_var).place(x=5, y=210)
 
@@ -81,21 +77,14 @@ class GestionHabitaciones(tk.Frame):
         ttk.Button(form_frame, text="Agregar", command=self.agregar_habitacion).place(x=355, y=160)
         ttk.Button(form_frame, text="Modificar", command=self.modificar_habitacion).place(x=445, y=160)
         ttk.Button(form_frame, text="Eliminar", command=self.eliminar_habitacion).place(x=535, y=160)
-
-        ttk.Button(self, text="Volver al Menú del Encargado", command=self.volver_menu_encargado).place(x=750,y=500)
-        
-
-        self.cargar_tipos_habitacion()
-        self.cargar_orientaciones()
-        self.cargar_estados_habitacion()
-    
+        ttk.Button(form_frame, text="Limpiar Datos", command=self.limpiar_datos).place(x=625, y=160)
         # Frame para la tabla de habitaciones
+        # Frame para la tabla de habitaciones
+        table_frame = ttk.Frame(self, padding=(10, 5))
+        table_frame.place(x=11.4, y=345.7, width=975.8, height=330)
 
-        table_frame = ttk.Frame(self)
-        table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        table_frame.place(x=5, y=250)
         self.habitaciones_table = ttk.Treeview(
-            table_frame, 
+            table_frame,
             columns=('ID', 'Numero', 'Precio', 'Camas', 'Piso', 'Capacidad', 'Tipo', 'Orientacion', 'Estado'),
             show='headings',  # Para mostrar solo las cabeceras de las columnas
             height=8  # Número de filas visibles, puedes ajustarlo según tus necesidades
@@ -124,8 +113,6 @@ class GestionHabitaciones(tk.Frame):
         self.habitaciones_table.column('Orientacion', width=150)
         self.habitaciones_table.column('Estado', width=150)
 
-        self.habitaciones_table.pack(fill=tk.BOTH, expand=True)
-
         self.habitaciones_table.grid(row=0, column=0, padx=20, pady=20)  # Ajustar márgenes a tu preferencia
         scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.habitaciones_table.yview)
         self.habitaciones_table.configure(yscroll=scrollbar.set)
@@ -133,11 +120,65 @@ class GestionHabitaciones(tk.Frame):
 
         # Cargar datos iniciales de la tabla
         self.cargar_habitaciones()
+        
+        self.cargar_tipos_habitacion()
+        self.cargar_orientaciones()
+        self.cargar_estados_habitacion()
 
-        self.habitaciones_table.bind("<Double-1>", self.cargar_datos_seleccionados) #Evento doble click que carga los datos en la tabla
+        self.habitaciones_table.bind("<Double-1>", self.cargar_datos_seleccionados)  # Evento doble click que carga los datos en la tabla
+
+#--------------------------------------------------------- MENU -----------------------------------------------------------------
+        # Configuración de estilos
+        style = ttk.Style()
+        style.configure("rounded.TButton", borderwidth=2, relief="solid", background="white", padding=10, font=('Helvetica', 12))
+        style.map("rounded.TButton", background=[('active', 'lightgray')])
+
+        # Botón Gestionar Habitaciones
+        self.boton_gestionar_habitaciones = ttk.Button(self, text="HABITACIONES", command=self.mostrar_gestion_habitaciones, style="rounded.TButton")
+        self.boton_gestionar_habitaciones.place(x=1055, y=266, width=165, height=45)
+
+        # Botón Gestionar Huéspedes
+        self.boton_gestionar_huespedes = ttk.Button(self, text="HUESPEDES", command=self.mostrar_gestion_huespedes, style="rounded.TButton")
+        self.boton_gestionar_huespedes.place(x=1055, y=366, width=165, height=45)
+
+        # Botón Gestionar Reservas
+        self.boton_gestionar_reservas = ttk.Button(self, text="RESERVAS", command=self.mostrar_gestion_reservas, style="rounded.TButton")
+        self.boton_gestionar_reservas.place(x=1055, y=466, width=165, height=45)
+
+        # Botón Cerrar Sesión
+        self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=self.cerrar_sesion, style="rounded.TButton")
+        self.boton_cerrar_sesion.place(x=1055, y=566, width=165, height=45)
+
+
+    def mostrar_gestion_habitaciones(self):
+        self.controlador.mostrar_frame("GestionHabitaciones")
+
+    def mostrar_gestion_huespedes(self):
+        self.controlador.mostrar_frame("GestionHuespedes")
+
+    def mostrar_gestion_reservas(self):
+        self.controlador.mostrar_frame("GestionReservas")
+
+    def cerrar_sesion(self):
+        print("Sesión cerrada exitosamente.")
+        messagebox.showinfo("Cerrar Sesion", "Sesión cerrada exitosamente.")
+        self.controlador.mostrar_frame("Login")
 
     def volver_menu_encargado(self):
         self.controlador.mostrar_frame("VentanaEncargado")
+#--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
+    def limpiar_datos(self):
+            self.id_habitacion_var.set("")
+            self.numero_habitacion_var.set("")
+            self.precio_noche_var.set(0)
+            self.camas_var.set(0)
+            self.piso_var.set(0)
+            self.capacidad_var.set(0)
+            self.tipo_habitacion_var.set("")
+            self.orientacion_var.set("")
+            self.estado_habitacion_var.set("")
+
+
     def cargar_estados_habitacion(self):
         estados = self.dao.cargar_estados_habitacion()
         if estados:
@@ -170,30 +211,38 @@ class GestionHabitaciones(tk.Frame):
         if habitaciones:
             for habitacion in habitaciones:
                 self.habitaciones_table.insert('', tk.END, values=(
-                    habitacion['id_habitacion'], 
-                    habitacion['numero_habitacion'], 
-                    habitacion['precio_noche'], 
-                    habitacion['camas'], 
-                    habitacion['piso'], 
-                    habitacion['capacidad'], 
-                    habitacion['tipo'], 
-                    habitacion['orientacion'], 
+                    habitacion['id_habitacion'],
+                    habitacion['numero_habitacion'],
+                    habitacion['precio_noche'],
+                    habitacion['camas'],
+                    habitacion['piso'],
+                    habitacion['capacidad'],
+                    habitacion['tipo'],
+                    habitacion['orientacion'],
                     habitacion['estado']
                 ))
 
     def agregar_habitacion(self):
-        params = (
-            self.numero_habitacion_var.get(),
-            self.precio_noche_var.get(),
-            self.camas_var.get(),
-            self.piso_var.get(),
-            self.capacidad_var.get(),
-            self.tipo_habitacion_var.get(),
-            self.orientacion_var.get(),
-            self.estado_habitacion_var.get()
-        )
-        self.dao.agregar_habitacion(params)
-        self.cargar_habitaciones()
+        if not self.id_habitacion_var.get():
+            params = (
+                self.numero_habitacion_var.get(),
+                self.precio_noche_var.get(),
+                self.camas_var.get(),
+                self.piso_var.get(),
+                self.capacidad_var.get(),
+                self.tipo_habitacion_var.get(),
+                self.orientacion_var.get(),
+                self.estado_habitacion_var.get()
+            )
+            if not self.dao.validar_existencia_habitacion(self.id_habitacion_var.get()):
+                self.dao.agregar_habitacion(params)
+                self.cargar_habitaciones()
+                self.limpiar_datos()
+            else:
+                messagebox.showerror("Error", "La habitación ya existe.")
+        else:
+            messagebox.showerror("Error", "El ID de la habitación no debe estar especificado para agregar.")
+            self.id_habitacion_var.set("")
 
     def modificar_habitacion(self):
         params = (
@@ -204,13 +253,16 @@ class GestionHabitaciones(tk.Frame):
             self.tipo_habitacion_var.get(),
             self.orientacion_var.get(),
             self.estado_habitacion_var.get(),
-            self.numero_habitacion_var.get()
+            self.numero_habitacion_var.get(),
+            self.id_habitacion_var.get()
         )
+        
         self.dao.modificar_habitacion(params)
         self.cargar_habitaciones()
+        self.limpiar_datos()
 
     def eliminar_habitacion(self):
-        params = (self.numero_habitacion_var.get(),)
+        params = (self.id_habitacion_var.get(),)
         self.dao.eliminar_habitacion(params)
         self.cargar_habitaciones()
 
@@ -228,8 +280,3 @@ class GestionHabitaciones(tk.Frame):
             self.tipo_habitacion_var.set(values[6])
             self.orientacion_var.set(values[7])
             self.estado_habitacion_var.set(values[8])
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = GestionHabitaciones(root)
-    root.mainloop()
