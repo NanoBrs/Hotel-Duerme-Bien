@@ -7,7 +7,7 @@ root = tk.Tk()
 root.title("Calendario")
 parent = root
 citas = []
-
+root.resizable(False, False)
 # Funcion para obtener todos los dias entre dos fechas
 def obtener_dias_entre_fechas(fecha_inicio, fecha_fin):
     dias = []
