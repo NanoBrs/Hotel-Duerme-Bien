@@ -8,10 +8,8 @@ class HabitacionCRUD:
         self.root = root
         self.root.title("Gestión de Habitaciones")
         self.root.geometry("1000x480")
-
         # Instancia de Database
         self.db = Database()
-      
         # Variables para campos de entrada
         self.id_habitacion_var = tk.StringVar()
         self.numero_habitacion_var = tk.StringVar()
@@ -28,7 +26,7 @@ class HabitacionCRUD:
         form_frame = ttk.Frame(self.root, padding=(20, 10))
         form_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
-          # Cargar la imagen de fondo
+        # Cargar la imagen de fondo
         self.bg_image = Image.open("img/Habitacion.png")
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
         
