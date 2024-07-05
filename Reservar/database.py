@@ -22,9 +22,10 @@ class Database:
             print(f"Error al conectar a MySQL: {e}")
             return False
 
-    def fetch_all(self, query):
-        self.cursor.execute(query)
+    def fetch_all(self, query, params=None):
+        self.cursor.execute(query, params)
         return self.cursor.fetchall()
+
 
     def cargar_habitacion_por_id(self, id_habitacion):
         query = f"""

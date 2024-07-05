@@ -13,7 +13,7 @@ class HabitacionApp:
         self.db = Database()  # Instancia de la base de datos
         self.db.connect_to_db()  # Conexion a la base de datos
         
-        self.id_habitacion_buscar = None  # Variable para buscar por ID de habitacion
+        self.id_habitacion_buscar = 10  # Variable para buscar por ID de habitacion
         self.current_image_index = 0  # Indice de la imagen actual
         self.images = ["habitacion1.png", "habitacion2.png", "habitacion3.png"]  # Lista de imagenes
         
