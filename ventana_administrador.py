@@ -36,7 +36,7 @@ class GestionEncargados(tk.Frame):
         self.boton_registrar = ttk.Button(form_frame, text="Registrar Encargado", command=self.registrar_usuario)
         self.boton_registrar.place(x=150, y=170)
 
-        #--------------------------------------------------------- MENU -----------------------------------------------------------------
+
         # Configuración de estilos
         style = ttk.Style()
         style.configure("rounded.TButton", borderwidth=2, relief="solid", background="white", padding=10, font=('Helvetica', 12))
@@ -65,48 +65,36 @@ class GestionEncargados(tk.Frame):
         apellido = self.entry_apellido.get()
         rut = self.entry_rut.get()
 
-        # Validación de datos
+        # Validaciones de los datos ingresados
         if not nombre or not apellido or not rut:
             self.mostrar_mensaje_error("Todos los campos son obligatorios")
             return
 
-        # Validación de RUT (formato básico)
-        if not rut.isdigit():
+        if not self.validar_rut(rut):
             self.mostrar_mensaje_error("RUT no válido")
             return
 
-        # Validación de longitud del RUT
-        if len(rut) < 7 or len(rut) > 12:
-            self.mostrar_mensaje_error("Longitud del RUT no válida")
-            return
+        # Mostrar mensaje de confirmación
+        self.mostrar_mensaje_exito("Encargado registrado con éxito")
 
-        # Preparar la consulta SQL para insertar el nuevo usuario
-        cursor = db.cursor()
-        sql = "INSERT INTO encargados_hotel (nombre, apellido, rut) VALUES (%s, %s, %s)"
-        valores = (nombre, apellido, rut)
+        # Limpiar los campos de entrada
+        self.entry_nombre.delete(0, tk.END)
+        self.entry_apellido.delete(0, tk.END)
+        self.entry_rut.delete(0, tk.END)
 
-        # Ejecutar la consulta y guardar los cambios
-        try:
-            cursor.execute(sql, valores)
-            db.commit()
-            cursor.close()
-            db.close()
-
-            # Mostrar mensaje de confirmación
-            self.mostrar_mensaje_exito("Encargado registrado con éxito")
-
-            # Limpiar los campos de entrada
-            self.entry_nombre.delete(0, tk.END)
-            self.entry_apellido.delete(0, tk.END)
-            self.entry_rut.delete(0, tk.END)
-        except mysql.connector.Error as error:
-            self.mostrar_mensaje_error(f"Error al registrar: {error}")
+    def mostrar_mensaje_exito(self, mensaje):
+        messagebox.showinfo("Éxito", mensaje)
 
     def mostrar_mensaje_error(self, mensaje):
         messagebox.showerror("Error", mensaje)
 
-    def mostrar_mensaje_exito(self, mensaje):
-        messagebox.showinfo("Éxito", mensaje)
+    def validar_rut(self, rut):
+        # Validación básica del RUT
+        if not rut.isdigit():                #isdigit() se aplica a una cadena y devuelve True si todos los caracteres de la cadena son dígitos y hay al menos un carácter en la cadena.
+            return False
+        if len(rut) < 7 or len(rut) > 12:
+            return False
+        return True
 
 if __name__ == "__main__":
     root = tk.Tk()
