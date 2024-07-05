@@ -1,53 +1,64 @@
 import tkinter as tk
-import mysql.connector
+from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
 
-class VentanaAdministrador:
-    def __init__(self, master):
-        self.master = master
-        self.master.title("Ventana del Administrador")
-        self.master.geometry("720x480")
+class GestionEncargados(tk.Frame):
+    def __init__(self, parent, controlador):
+        tk.Frame.__init__(self, parent)
+        self.controlador = controlador
 
-        # Crear una etiqueta de título
-        label = tk.Label(master, text="Bienvenido Administrador", font=("Arial",24))
-        label.pack(pady=20)
+        # Agregar imagen de fondo
+        self.background_image = tk.PhotoImage(file="img/MENU2.png")
+        self.background_label = tk.Label(self, image=self.background_image)
+        self.background_label.place(relwidth=1, relheight=1)
 
-        # Crear un marco para la información del usuario
-        self.marco_usuario = tk.Frame(master)
-        self.marco_usuario.pack(pady=20)
+        # Frame para el formulario de ingreso y edición
+        form_frame = ttk.Frame(self, padding=(20, 10))
+        form_frame.place(x=11.4, y=84.6, width=975.8, height=300)  # Ajustado para la mitad superior del área deseada
 
-        # Etiquetas y entradas para la información del encargado
-        label_nombre = tk.Label(self.marco_usuario, text="Nombre:")
-        label_nombre.pack(pady=5)
-        self.entry_nombre = tk.Entry(self.marco_usuario)
-        self.entry_nombre.pack(pady=5)
+        # Campos de entrada
+        ttk.Label(form_frame, text="GESTIÓN DE ENCARGADOS", font=("Helvetica", 16)).place(x=5, y=10)
 
-        label_apellido = tk.Label(self.marco_usuario, text="Apellido:")
-        label_apellido.pack(pady=5)
-        self.entry_apellido = tk.Entry(self.marco_usuario)
-        self.entry_apellido.pack(pady=5)
+        # Primera columna
+        ttk.Label(form_frame, text="Nombre:").place(x=5, y=50)
+        self.entry_nombre = ttk.Entry(form_frame)
+        self.entry_nombre.place(x=150, y=50)
 
-        label_rut = tk.Label(self.marco_usuario, text="RUT:")
-        label_rut.pack(pady=5)
-        self.entry_rut = tk.Entry(self.marco_usuario)
-        self.entry_rut.pack(pady=5)
+        ttk.Label(form_frame, text="Apellido:").place(x=5, y=90)
+        self.entry_apellido = ttk.Entry(form_frame)
+        self.entry_apellido.place(x=150, y=90)
+
+        ttk.Label(form_frame, text="RUT:").place(x=5, y=130)
+        self.entry_rut = ttk.Entry(form_frame)
+        self.entry_rut.place(x=150, y=130)
 
         # Botón para registrar usuario
-        self.boton_registrar = tk.Button(master, text="Registrar encargado", command=self.registrar_usuario)
-        self.boton_registrar.pack(pady=10)
+        self.boton_registrar = ttk.Button(form_frame, text="Registrar Encargado", command=self.registrar_usuario)
+        self.boton_registrar.place(x=150, y=170)
 
-    # Función para registrar usuario
+        #--------------------------------------------------------- MENU -----------------------------------------------------------------
+        # Configuración de estilos
+        style = ttk.Style()
+        style.configure("rounded.TButton", borderwidth=2, relief="solid", background="white", padding=10, font=('Helvetica', 12))
+        style.map("rounded.TButton", background=[('active', 'lightgray')])
+
+        # Botón Gestionar Encargados
+        self.boton_gestionar_encargados = ttk.Button(self, text="ENCARGADOS", command=self.mostrar_gestion_encargados, style="rounded.TButton")
+        self.boton_gestionar_encargados.place(x=1055, y=266, width=165, height=45)
+
+        # Botón Cerrar Sesión
+        self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=self.cerrar_sesion, style="rounded.TButton")
+        self.boton_cerrar_sesion.place(x=1055, y=366, width=165, height=45)
+
+    def mostrar_gestion_encargados(self):
+        self.controlador.mostrar_frame("GestionEncargados")
+
+    def cerrar_sesion(self):
+        print("Sesión cerrada exitosamente.")
+        messagebox.showinfo("Cerrar Sesión", "Sesión cerrada exitosamente.")
+        self.controlador.mostrar_frame("Login")
+
     def registrar_usuario(self):
-        # Conexión a la base de datos MySQL
-        try:
-            db = mysql.connector.connect(
-                host="localhost",
-                user="usuario_mysql",
-                password="contrasena_mysql",
-                database="nombre_base_datos"
-            )
-        except mysql.connector.Error as error:
-            self.mostrar_mensaje_error(f"Error de conexión: {error}")
-            return
 
         # Obtener los datos del usuario
         nombre = self.entry_nombre.get()
@@ -92,23 +103,14 @@ class VentanaAdministrador:
             self.mostrar_mensaje_error(f"Error al registrar: {error}")
 
     def mostrar_mensaje_error(self, mensaje):
-        # Eliminar mensajes anteriores si existen
-        for widget in self.master.pack_slaves():
-            if isinstance(widget, tk.Label) and widget.cget("fg") == "red":
-                widget.destroy()
-        mensaje_error = tk.Label(self.master, text=mensaje, fg="red")
-        mensaje_error.pack()
+        messagebox.showerror("Error", mensaje)
 
     def mostrar_mensaje_exito(self, mensaje):
-        # Eliminar mensajes anteriores si existen
-        for widget in self.master.pack_slaves():
-            if isinstance(widget, tk.Label) and widget.cget("fg") == "green":
-                widget.destroy()
-        mensaje_exito = tk.Label(self.master, text=mensaje, fg="green")
-        mensaje_exito.pack()
+        messagebox.showinfo("Éxito", mensaje)
 
-# Iniciar la interfaz
 if __name__ == "__main__":
     root = tk.Tk()
-    app = VentanaAdministrador(root)
+    root.title("Sistema de Gestión de Encargados")
+    app = GestionEncargados(root, None)
+    app.pack(fill="both", expand=True)
     root.mainloop()
