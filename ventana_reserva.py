@@ -10,43 +10,52 @@ class VentanaReserva:
         self.master.geometry("1000x800")
         
         # Crear los widgets de la ventana de reserva
+        self.label_rut = tk.Label(master, text="RUT:")
+        self.label_rut.grid(row=0, column=0)
+        self.entry_rut = tk.Entry(master)
+        self.entry_rut.grid(row=0, column=1)
+        
+        self.button_validar_rut = tk.Button(master, text="Validar RUT", command=self.validar_rut)
+        self.button_validar_rut.grid(row=0, column=2)
+        
         self.label_id_usuario = tk.Label(master, text="ID Usuario:")
-        self.label_id_usuario.grid(row=0, column=0)
-        self.entry_id_usuario = tk.Entry(master)
-        self.entry_id_usuario.grid(row=0, column=1)
+        self.label_id_usuario.grid(row=1, column=0)
+        self.entry_id_usuario = tk.Entry(master, state='readonly')
+        self.entry_id_usuario.grid(row=1, column=1)
         
         self.label_fecha_llegada = tk.Label(master, text="Fecha de Llegada:")
-        self.label_fecha_llegada.grid(row=1, column=0)
+        self.label_fecha_llegada.grid(row=2, column=0)
         self.entry_fecha_llegada = tk.Entry(master)
-        self.entry_fecha_llegada.grid(row=1, column=1)
+        self.entry_fecha_llegada.grid(row=2, column=1)
         
         self.label_fecha_salida = tk.Label(master, text="Fecha de Salida:")
-        self.label_fecha_salida.grid(row=2, column=0)
-        self.entry_fecha_salida.grid(row=2, column=1)
+        self.label_fecha_salida.grid(row=3, column=0)
+        self.entry_fecha_salida = tk.Entry(master)
+        self.entry_fecha_salida.grid(row=3, column=1)
 
         self.label_tipo_habitacion = tk.Label(master, text="Tipo de Habitación:")
-        self.label_tipo_habitacion.grid(row=3, column=0)
+        self.label_tipo_habitacion.grid(row=4, column=0)
         self.combo_tipo_habitacion = ttk.Combobox(master)
-        self.combo_tipo_habitacion.grid(row=3, column=1)
+        self.combo_tipo_habitacion.grid(row=4, column=1)
         self.cargar_tipos_habitacion()
         
         self.label_precio_total = tk.Label(master, text="Precio Total:")
-        self.label_precio_total.grid(row=4, column=0)
+        self.label_precio_total.grid(row=5, column=0)
         self.entry_precio_total = tk.Entry(master, state='readonly')
-        self.entry_precio_total.grid(row=4, column=1)
+        self.entry_precio_total.grid(row=5, column=1)
 
         # Botones de acciones
         self.button_calcular = tk.Button(master, text="Calcular Total", command=self.calcular_total)
-        self.button_calcular.grid(row=5, column=0)
+        self.button_calcular.grid(row=6, column=0)
 
         self.button_agregar = tk.Button(master, text="Agregar", command=self.agregar_reserva)
-        self.button_agregar.grid(row=5, column=1)
+        self.button_agregar.grid(row=6, column=1)
         
         self.button_modificar = tk.Button(master, text="Modificar", command=self.modificar_reserva)
-        self.button_modificar.grid(row=5, column=2)
+        self.button_modificar.grid(row=6, column=2)
         
         self.button_eliminar = tk.Button(master, text="Eliminar", command=self.eliminar_reserva)
-        self.button_eliminar.grid(row=5, column=3)
+        self.button_eliminar.grid(row=6, column=3)
         
         # Tabla para mostrar las reservas
         self.tree = ttk.Treeview(master, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"), show="headings")
@@ -55,7 +64,7 @@ class VentanaReserva:
         self.tree.heading("Fecha de Salida", text="Fecha de Salida")
         self.tree.heading("Tipo de Habitación", text="Tipo de Habitación")
         self.tree.heading("Precio Total", text="Precio Total")
-        self.tree.grid(row=6, column=0, columnspan=4)
+        self.tree.grid(row=7, column=0, columnspan=4)
         
         # Cargar las reservas existentes
         self.cargar_reservas()
@@ -79,7 +88,21 @@ class VentanaReserva:
         rows = db.fetch_all(query)
         for row in rows:
             self.tree.insert("", "end", values=(row['id_usuario'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total']))
-    
+
+    def validar_rut(self):
+        rut = self.entry_rut.get()
+        db = Database()
+        query = "SELECT id_huesped FROM huespedes WHERE rut = %s"
+        result = db.fetch_one(query, (rut,))
+        if result:
+            self.entry_id_usuario.config(state='normal')
+            self.entry_id_usuario.delete(0, tk.END)
+            self.entry_id_usuario.insert(0, result['id_huesped'])
+            self.entry_id_usuario.config(state='readonly')
+            messagebox.showinfo("Éxito", "RUT validado correctamente")
+        else:
+            messagebox.showerror("Error", "RUT no encontrado. Por favor registre al huésped primero.")
+
     def calcular_total(self):
         fecha_llegada = self.entry_fecha_llegada.get()
         fecha_salida = self.entry_fecha_salida.get()
@@ -131,14 +154,20 @@ class VentanaReserva:
 
         db = Database()
         try:
-            db.execute_query("""
-            INSERT INTO reserva (id_usuario, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total)
-            VALUES (%s, %s, %s, %s, %s)
-            """, (id_usuario, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total))
+            habitacion_query = "SELECT id_habitacion FROM habitacion WHERE id_tipo_habitacion = %s LIMIT 1"
+            habitacion = db.fetch_one(habitacion_query, (id_tipo_habitacion,))
+            if habitacion:
+                id_habitacion = habitacion['id_habitacion']
+                db.execute_query("""
+                INSERT INTO reserva (id_usuario, fecha_llegada, fecha_salida, id_habitacion, precio_total)
+                VALUES (%s, %s, %s, %s, %s)
+                """, (id_usuario, fecha_llegada, fecha_salida, id_habitacion, precio_total))
 
-            messagebox.showinfo("Éxito", "Reserva agregada correctamente")
-            self.tree.delete(*self.tree.get_children())  # Limpiar tabla
-            self.cargar_reservas()  # Recargar reservas
+                messagebox.showinfo("Éxito", "Reserva agregada correctamente")
+                self.tree.delete(*self.tree.get_children())  # Limpiar tabla
+                self.cargar_reservas()  # Recargar reservas
+            else:
+                messagebox.showerror("Error", "No se encontró una habitación disponible para el tipo seleccionado")
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -159,19 +188,25 @@ class VentanaReserva:
             return
         
         id_tipo_habitacion = list(self.tipo_habitacion_dict.keys())[list(self.tipo_habitacion_dict.values()).index(tipo_habitacion)]
-        reserva_id = self.tree.item(selected_item)["values"][0]
 
         db = Database()
         try:
-            db.execute_query("""
-            UPDATE reserva
-            SET id_usuario = %s, fecha_llegada = %s, fecha_salida = %s, id_tipo_habitacion = %s, precio_total = %s
-            WHERE id_reserva = %s
-            """, (id_usuario, fecha_llegada, fecha_salida, id_tipo_habitacion, precio_total, reserva_id))
+            habitacion_query = "SELECT id_habitacion FROM habitacion WHERE id_tipo_habitacion = %s LIMIT 1"
+            habitacion = db.fetch_one(habitacion_query, (id_tipo_habitacion,))
+            if habitacion:
+                id_habitacion = habitacion['id_habitacion']
+                selected_reserva = self.tree.item(selected_item, "values")
+                db.execute_query("""
+                UPDATE reserva
+                SET id_usuario = %s, fecha_llegada = %s, fecha_salida = %s, id_habitacion = %s, precio_total = %s
+                WHERE id_usuario = %s AND fecha_llegada = %s AND fecha_salida = %s
+                """, (id_usuario, fecha_llegada, fecha_salida, id_habitacion, precio_total, selected_reserva[0], selected_reserva[1], selected_reserva[2]))
 
-            messagebox.showinfo("Éxito", "Reserva modificada correctamente")
-            self.tree.delete(*self.tree.get_children())  # Limpiar tabla
-            self.cargar_reservas()  # Recargar reservas
+                messagebox.showinfo("Éxito", "Reserva modificada correctamente")
+                self.tree.delete(*self.tree.get_children())  # Limpiar tabla
+                self.cargar_reservas()  # Recargar reservas
+            else:
+                messagebox.showerror("Error", "No se encontró una habitación disponible para el tipo seleccionado")
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -180,12 +215,15 @@ class VentanaReserva:
         if not selected_item:
             messagebox.showerror("Error", "Seleccione una reserva para eliminar")
             return
-        
-        id_reserva = self.tree.item(selected_item)["values"][0]
 
         db = Database()
         try:
-            db.execute_query("DELETE FROM reserva WHERE id_reserva = %s", (id_reserva,))
+            selected_reserva = self.tree.item(selected_item, "values")
+            db.execute_query("""
+            DELETE FROM reserva
+            WHERE id_usuario = %s AND fecha_llegada = %s AND fecha_salida = %s
+            """, (selected_reserva[0], selected_reserva[1], selected_reserva[2]))
+
             messagebox.showinfo("Éxito", "Reserva eliminada correctamente")
             self.tree.delete(*self.tree.get_children())  # Limpiar tabla
             self.cargar_reservas()  # Recargar reservas
