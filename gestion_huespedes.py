@@ -1,12 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog, messagebox
+from DAOHuespedes import DAOHuespedes_Consultas
 
 class GestionHuespedes(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
         self.title("Gestion de Huéspedes")
-        self.geometry("1580x600")
+        self.geometry("1280x720")
+        
+        #Instancia de DAOHuespedes
+        self.db = DAOHuespedes_Consultas() 
         
         style = ttk.Style()
         style.theme_use('clam')
@@ -44,14 +48,23 @@ class GestionHuespedes(tk.Toplevel):
         ttk.Button(buscar_frame, text = "Buscar", command = self.buscar_huesped).pack(side = tk.LEFT, padx = 5)
         
         # Lista de huéspedes
-        self.tree = ttk.Treeview(main_frame, columns = self.campos, show = 'headings')
+        self.tree = ttk.Treeview(main_frame, columns = ["ID"] + self.campos, show = 'headings')
+        self.tree.heading("ID", text = "ID")
+        self.tree.column("ID", width = 50)
         for col in self.campos:
             self.tree.heading(col, text = col)
             self.tree.column(col, width = 100)
         self.tree.pack(fill = tk.BOTH, expand = True)
         
-        #self.cargar_datos()
+        self.cargar_datos()
         
+    def cargar_datos(self):
+        huespedes = self.db.cargar_huespedes()
+        for huesped in huespedes:
+            self.tree.insert('', tk.END, values =  (huesped['id_huesped'], huesped['nombre'], huesped['apellido1'], 
+                                                    huesped['apellido2'], huesped['correo'], 
+                                                    huesped['numero'], huesped['rut']))
+    
     def buscar_huesped(self):
         buscar = self.buscar.get().lower()
         for item in self.tree.get_children():
@@ -82,10 +95,6 @@ class GestionHuespedes(tk.Toplevel):
     def limpiar_campos(self):
         for entrada in self.inputs.values():
             entrada.delete(0, tk.END)
-    #def cargar_datos(self):
-        #datos = [("Oscar", "Acevedo", "Sanchez", "89435058", "oscaracevedosanchez@gmail.com", "20921224-2")]
-        #for dato in datos:
-            #self.lista.insert(tk.END, " | ".join(dato))
 
 if __name__ == "__main__":
     root = tk.Tk()
