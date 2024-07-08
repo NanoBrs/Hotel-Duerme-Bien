@@ -75,13 +75,12 @@ class GestionHuespedes(tk.Toplevel):
                 self.tree.selection_remove(item)
     
     def agregar_huesped(self):
-        nuevo_huesped = []
-        for campo in self.campos:
-            nuevo_huesped.append(self.inputs[campo].get())
-            
-        self.tree.insert('', tk.END, values = nuevo_huesped)
-        
-        self.limpiar_campos()
+        nuevo_huesped = [self.inputs[campo].get() for campo in self.campos]
+        if self.db.agregar_huespedes(*nuevo_huesped):
+            self.cargar_datos()
+            self.limpiar_campos()
+        else:
+            messagebox.showerror("No se pudo agregar al huesped")
 
     def eliminar_huesped(self):
         eliminar = self.tree.selection()
