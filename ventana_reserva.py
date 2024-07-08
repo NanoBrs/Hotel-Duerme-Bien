@@ -175,7 +175,7 @@ class VentanaReserva:
             """, (id_usuario, fecha_llegada, fecha_salida, precio_total, 1))  # Asumimos que el estado inicial es '1' (pendiente)
 
             # Obtener el ID de la reserva recién insertada
-            id_reserva = db.fetch_one("SELECT LAST_INSERT_ID() as id_reserva")['id_reserva']
+            id_detalle_reserva = db.fetch_one("SELECT LAST_INSERT_ID() as id_detalle_reserva")['id_detalle_reserva']
 
             # Insertar en la tabla detalle_reserva para cada habitación seleccionada
             query_habitaciones = """
@@ -187,9 +187,9 @@ class VentanaReserva:
             if habitaciones_disponibles:
                 id_habitacion = habitaciones_disponibles[0]['id_habitacion']
                 db.execute_query("""
-                INSERT INTO detalle_reserva (id_reserva, id_habitacion, hora)
+                INSERT INTO detalle_reserva (id_detalle_reserva, id_habitacion, hora)
                 VALUES (%s, %s, %s)
-                """, (id_reserva, id_habitacion, datetime.now().strftime("%H:%M:%S")))
+                """, (id_detalle_reserva, id_habitacion, datetime.now().strftime("%H:%M:%S")))
 
                 # Actualizar el estado de la habitación a ocupada
                 db.execute_query("UPDATE habitacion SET id_estado_habitacion = 3 WHERE id_habitacion = %s", (id_habitacion,))
