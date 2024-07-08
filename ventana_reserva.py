@@ -87,16 +87,17 @@ class VentanaReserva:
     def cargar_reservas(self):
         db = Database()
         query = """
-        SELECT r.id_usuario, r.fecha_llegada, r.fecha_salida, th.tipo as tipo_habitacion, r.precio_total, eh.estado
+        SELECT r.id_reserva, r.fecha_llegada, r.fecha_salida, h.numero_habitacion, th.tipo AS tipo_habitacion, r.precio_total, eh.estado AS estado_habitacion
         FROM reserva r
-        JOIN habitacion h ON r.id_habitacion = h.id_habitacion
+        JOIN detalle_reserva dr ON r.id_reserva = dr.id_reserva
+        JOIN habitacion h ON dr.id_habitacion = h.id_habitacion
         JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
         JOIN estado_habitacion eh ON h.id_estado_habitacion = eh.id_estado_habitacion
         """
         rows = db.fetch_all(query)
         for row in rows:
-            self.tree.insert("", "end", values=(row['id_usuario'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total'], row['estado']))
-        
+            self.tree.insert("", "end", values=(row['id_reserva'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total'], row['estado_habitacion']))
+
     def verificar_rut(self):
         rut = self.entry_rut.get()
         if not rut:
