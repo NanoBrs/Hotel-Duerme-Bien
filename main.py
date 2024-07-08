@@ -5,7 +5,7 @@ from Interfaces.Encargado.gestion_habitacion import GestionHabitaciones
 from Interfaces.Encargado.gestion_huespedes import GestionHuespedes
 from Interfaces.Encargado.gestion_reservas import GestionReservas
 from Interfaces.Administrador.ventana_administrador import GestionEncargados
-
+from tkinter import PhotoImage
 
 
 class AppPrincipal(tk.Tk):
@@ -15,6 +15,10 @@ class AppPrincipal(tk.Tk):
         self.title("Aplicación de Gestión")
         self.geometry("1280x720")
         self.resizable(False, False)
+
+        # Establece el ícono de la ventana y la barra de tareas usando un archivo .ico
+        self.icon_image = PhotoImage(file="img/icono.png")
+        self.iconphoto(True, self.icon_image)
 
         contenedor = tk.Frame(self)
         contenedor.pack(side="top", fill="both", expand=True)
