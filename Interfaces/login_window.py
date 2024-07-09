@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from DAO.DAO_habitaciones import DAO_habitaciones
 from DAO.DAO_Login import LoginDAO
+from DAO.DAO_habitaciones import DAO_habitaciones
 
 class Login(tk.Frame):
     def __init__(self, parent, controlador):
