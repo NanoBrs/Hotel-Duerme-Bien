@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkcalendar import Calendar
 from database import Database
-from habitaciones import HabitacionesApp
+from Habitaciones import HabitacionesApp
 from datetime import datetime
 
 USUARIO = 1  # ID del usuario actual que está registrando la reserva
