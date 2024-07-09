@@ -20,3 +20,19 @@ class DAOHuespedes_Consultas:
         FROM huespedes
         """
         return self.db.fetch_all(query)
+    
+    def eliminar_huespedes(self, id):
+        query = """
+        DELETE FROM huespedes WHERE id_huesped = %s
+        """
+        parametros = (id,)
+        return self.db.execute_query(query, parametros)
+    
+    def actualizar_huespedes(self, id, nombre, apellido1, apellido2, correo, numero, rut):
+        query = """
+        UPDATE huespedes
+        SET nombre = %s, apellido1 = %s, apellido2 = %s, correo = %s, numero = %s, rut = %s
+        WHERE id_huesped = %s
+        """
+        parametros = (nombre, apellido1, apellido2, correo, numero, rut, id)
+        return self.db.execute_query(query, parametros)

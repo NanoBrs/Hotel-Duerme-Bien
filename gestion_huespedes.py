@@ -23,7 +23,7 @@ class GestionHuespedes(tk.Toplevel):
         input_frame = ttk.Frame(main_frame)
         input_frame.pack(fill=tk.X, pady=(0, 10))
         
-        self.campos = ["Nombre", "Apellido_1", "Apellido_2", "Telefono", "Correo Electronico", "RUT"]
+        self.campos = ["Nombre", "Apellido_1", "Apellido_2", "Correo Electronico", "Telefono", "RUT"]
         self.inputs = {}
         
         for i, campo in enumerate(self.campos):
@@ -36,6 +36,7 @@ class GestionHuespedes(tk.Toplevel):
         boton_frame.grid(row = 3, column = 0, columnspan = 4, sticky = "e", padx = 5, pady = 5)
         
         ttk.Button(boton_frame, text = "Agregar Huésped", command = self.agregar_huesped).pack(side = tk.LEFT, padx = (0, 5))
+        ttk.Button(boton_frame, text = "Modificar Datos", command = self.modificar_huesped).pack(side = tk.LEFT, padx = (0, 5))
         ttk.Button(boton_frame, text = "Eliminar Huésped", command = self.eliminar_huesped).pack(side = tk.LEFT, padx = (0, 5))
         ttk.Button(boton_frame, text = "Limpiar Datos", command = self.limpiar_campos).pack(side = tk.LEFT, padx = 2)
         
@@ -55,6 +56,8 @@ class GestionHuespedes(tk.Toplevel):
             self.tree.heading(col, text = col)
             self.tree.column(col, width = 100)
         self.tree.pack(fill = tk.BOTH, expand = True)
+        
+        self.tree.bind("<Double-1>", self.huesped_select)
         
         self.cargar_datos()
         
@@ -89,8 +92,32 @@ class GestionHuespedes(tk.Toplevel):
             return
         if messagebox.askyesno("Eliminar Huésped", "¿Esta seguro de eliminar este huésped?"):
             for item in eliminar:
-                self.tree.delete(item)
+                valores = self.tree.item(item)['values']
+                id = valores[0]
+                if self.db.eliminar_huespedes(id):
+                    self.tree.delete(item)
+                else:
+                    messagebox.showerror(f"No se pudo eliminar el huesped con ID {id}")
 
+    def huesped_select(self, evento):
+        item = self.tree.selection()[0]
+        valores = self.tree.item(item, "values")
+        self.huesped_seleccionado = valores[0]
+        for i, campo in enumerate(self.campos):
+            self.inputs[campo].delete(0, tk.END)
+            self.inputs[campo].insert(0, valores[i+1])
+    
+    def modificar_huesped(self):
+        if not self.huesped_seleccionado:
+            messagebox.showwarning("Modificar Huésped", "Por favor, seleccione un huésped para modificar")
+        nuevos_datos = [self.inputs[campo].get() for campo in self.campos]
+        if self.db.actualizar_huespedes(self.huesped_seleccionado, *nuevos_datos):
+            messagebox.showinfo("Exito", "Huésped actualizado correctamente")
+            self.cargar_datos()
+            self.limpiar_campos()
+        else:
+            messagebox.showerror("Error", "No se pudo actualizar el huésped")
+        
     def limpiar_campos(self):
         for entrada in self.inputs.values():
             entrada.delete(0, tk.END)
