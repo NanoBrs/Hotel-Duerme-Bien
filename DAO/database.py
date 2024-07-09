@@ -1,6 +1,5 @@
 import mysql.connector
 from mysql.connector import Error
-from tkinter import messagebox
 
 class Database:
     def __init__(self):
@@ -20,7 +19,7 @@ class Database:
                 self.cursor = self.conn.cursor(dictionary=True)
                 return True
         except Error as e:
-            messagebox.showerror("Error", f"Error al conectar a MySQL: {e}")
+            print(f"Error al conectar a MySQL: {e}")
             return False
 
     def disconnect_from_db(self):
@@ -30,7 +29,7 @@ class Database:
                 self.conn.close()
                 print("Desconexión exitosa")
         except Error as e:
-            messagebox.showerror("Error", f"Error al desconectar de MySQL: {e}")
+            print(f"Error al desconectar de MySQL: {e}")
 
     def execute_query(self, query, params=None):
         try:
@@ -41,7 +40,7 @@ class Database:
             self.conn.commit()
             return True
         except Error as e:
-            messagebox.showerror("Error", f"Error en la consulta: {e}")
+            print(f"Error en la consulta: {e}")
             return False
         finally:
             self.disconnect_from_db()
@@ -54,7 +53,7 @@ class Database:
             self.cursor.execute(query, params)
             return self.cursor.fetchone()
         except Error as e:
-            messagebox.showerror("Error", f"Error al obtener resultado: {e}")
+            print(f"Error al obtener resultado: {e}")
             return None
         finally:
             self.disconnect_from_db()
@@ -67,8 +66,7 @@ class Database:
             self.cursor.execute(query, params)
             return self.cursor.fetchall()
         except Error as e:
-            messagebox.showerror("Error", f"Error al obtener resultados: {e}")
+            print(f"Error al obtener resultados: {e}")
             return []
         finally:
             self.disconnect_from_db()
-
