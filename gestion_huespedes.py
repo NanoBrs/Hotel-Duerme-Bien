@@ -1,3 +1,4 @@
+import re
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog, messagebox
@@ -11,7 +12,7 @@ class GestionHuespedes(tk.Toplevel):
         
         #Instancia de DAOHuespedes
         self.db = DAOHuespedes_Consultas() 
-        
+        self.huesped_seleccionado = None
         style = ttk.Style()
         style.theme_use('clam')
         
@@ -62,28 +63,72 @@ class GestionHuespedes(tk.Toplevel):
         self.cargar_datos()
         
     def cargar_datos(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
         huespedes = self.db.cargar_huespedes()
         for huesped in huespedes:
             self.tree.insert('', tk.END, values =  (huesped['id_huesped'], huesped['nombre'], huesped['apellido1'], 
                                                     huesped['apellido2'], huesped['correo'], 
                                                     huesped['numero'], huesped['rut']))
     
+    def validar_inputs(self):
+        for campo, entrada in self.inputs.items():
+            valor = entrada.get().strip()
+            if not valor:
+                return False
+            if campo == 'nombre' or campo == 'apellido1' or campo == 'apellido2':
+                if len(valor) > 40:
+                    messagebox.showerror("Error", f"{campo.capitalize()} debe tener maximo 40 caracteres")
+                    return False
+            elif campo == 'correo':
+                if len(valor) > 70:
+                    messagebox.showerror("Error", "Correo debe tener maximo 70 caracteres")
+                    return False
+                if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", valor):
+                    messagebox.showerror("Error", "Correo inválido. Debe tener un formato válido (ejemplo@dominio.com)")
+                    return False
+            elif campo == 'numero':
+                if len(valor) > 15:
+                    messagebox.showerror("Error", "Número debe tener maximo 15 caracteres")
+                    return False
+                if not valor.isdigit():
+                    messagebox.showerror("Error", "Número debe contener solo digitos")
+                    return False
+            elif campo == "rut":
+                if len(valor) > 20:
+                    messagebox.showerror("Error", "RUT debe tener maximo 20 caracteres")
+                    return False
+                if not re.match(r"^\d{1,2}\.\d{3}\.\d{3}[-][0-9kK]{1}$", valor):
+                    messagebox.showerror("Error", "RUT inválido")
+                    return False
+        return True
+
     def buscar_huesped(self):
-        buscar = self.buscar.get().lower()
+        buscar = self.buscar.get()
+        resultado = self.db.buscar_huespedes(buscar)
+        
+        #Limpia la vista actual
         for item in self.tree.get_children():
-            valores = self.tree.item(item)['values']
-            if any(buscar in str(valor).lower() for valor in valores):
-                self.tree.selection_add(item)
-            else:
-                self.tree.selection_remove(item)
+            self.tree.delete(item)
+        
+        #Muestra los resultados
+        for huesped in resultado:
+            self.tree.insert('', tk.END, values =  (huesped['id'], huesped['nombre'], huesped['apellido1'], 
+                                                    huesped['apellido2'], huesped['correo'], 
+                                                    huesped['numero'], huesped['rut']))
     
     def agregar_huesped(self):
+        if not self.validar_inputs():
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
+            return
+        
         nuevo_huesped = [self.inputs[campo].get() for campo in self.campos]
         if self.db.agregar_huespedes(*nuevo_huesped):
             self.cargar_datos()
             self.limpiar_campos()
+            messagebox.showinfo("Exito", "Huésped agregado correctamente")
         else:
-            messagebox.showerror("No se pudo agregar al huesped")
+            messagebox.showerror("Error", "No se pudo agregar al huesped")
 
     def eliminar_huesped(self):
         eliminar = self.tree.selection()
@@ -110,6 +155,12 @@ class GestionHuespedes(tk.Toplevel):
     def modificar_huesped(self):
         if not self.huesped_seleccionado:
             messagebox.showwarning("Modificar Huésped", "Por favor, seleccione un huésped para modificar")
+            return
+        
+        if not self.validar_inputs():
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
+            return
+        
         nuevos_datos = [self.inputs[campo].get() for campo in self.campos]
         if self.db.actualizar_huespedes(self.huesped_seleccionado, *nuevos_datos):
             messagebox.showinfo("Exito", "Huésped actualizado correctamente")
@@ -121,6 +172,7 @@ class GestionHuespedes(tk.Toplevel):
     def limpiar_campos(self):
         for entrada in self.inputs.values():
             entrada.delete(0, tk.END)
+        self.huesped_seleccionado = None
 
 if __name__ == "__main__":
     root = tk.Tk()

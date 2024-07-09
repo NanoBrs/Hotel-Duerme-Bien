@@ -36,3 +36,14 @@ class DAOHuespedes_Consultas:
         """
         parametros = (nombre, apellido1, apellido2, correo, numero, rut, id)
         return self.db.execute_query(query, parametros)
+    
+    def buscar_huespedes(self, busqueda):
+        query = """
+        SELECT id_huesped, nombre, apellido1, apellido2, correo, numero, rut
+        FROM huespedes
+        WHERE nombre LIKE %s OR apellido1 LIKE %s OR apellido2 LIKE %s OR correo LIKE %s
+        OR numero LIKE %s OR rut LIKE %s
+        """
+        
+        parametros = ('%' + busqueda + '%') * 6
+        return self.db.fetch_all(query, parametros)
