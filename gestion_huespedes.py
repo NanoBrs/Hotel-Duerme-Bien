@@ -70,38 +70,49 @@ class GestionHuespedes(tk.Toplevel):
             self.tree.insert('', tk.END, values =  (huesped['id_huesped'], huesped['nombre'], huesped['apellido1'], 
                                                     huesped['apellido2'], huesped['correo'], 
                                                     huesped['numero'], huesped['rut']))
-    
+    #Validaciones
     def validar_inputs(self):
-        for campo, entrada in self.inputs.items():
-            valor = entrada.get().strip()
-            if not valor:
-                return False
-            if campo == 'nombre' or campo == 'apellido1' or campo == 'apellido2':
-                if len(valor) > 40:
-                    messagebox.showerror("Error", f"{campo.capitalize()} debe tener maximo 40 caracteres")
-                    return False
-            elif campo == 'correo':
-                if len(valor) > 70:
-                    messagebox.showerror("Error", "Correo debe tener maximo 70 caracteres")
-                    return False
-                if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", valor):
-                    messagebox.showerror("Error", "Correo inválido. Debe tener un formato válido (ejemplo@dominio.com)")
-                    return False
-            elif campo == 'numero':
-                if len(valor) > 15:
-                    messagebox.showerror("Error", "Número debe tener maximo 15 caracteres")
-                    return False
-                if not valor.isdigit():
-                    messagebox.showerror("Error", "Número debe contener solo digitos")
-                    return False
-            elif campo == "rut":
-                if len(valor) > 20:
-                    messagebox.showerror("Error", "RUT debe tener maximo 20 caracteres")
-                    return False
-                if not re.match(r"^\d{1,2}\.\d{3}\.\d{3}[-][0-9kK]{1}$", valor):
-                    messagebox.showerror("Error", "RUT inválido")
-                    return False
-        return True
+        try:
+            for campo, entrada in self.inputs.items():
+                valor = entrada.get().strip()
+                if not valor:
+                    raise ValueError(f"El campo {campo} es obligatorio")
+                if campo in ['Nombre', 'Apellido_1', 'Apellido_2']:
+                    self.validar_nombre(campo, valor)
+                elif campo == 'Correo Electronico':
+                    self.validar_correo(valor)
+                elif campo == 'Telefono':
+                    self.validar_telefono(valor)
+                elif campo == 'RUT':
+                    self.validar_rut(valor)
+            return True
+        except Exception as e:
+            messagebox.showerror("Error de validación", str(e))
+            return False
+
+    def validar_nombre(self, campo, valor):
+        if len(valor) > 40:
+            raise ValueError(f"{campo} debe tener máximo 40 caracteres")
+        if not valor.replace(" ", "").isalpha():
+            raise ValueError(f"{campo} solo debe contener letras y espacios")
+
+    def validar_correo(self, valor):
+        if len(valor) > 70:
+            raise ValueError("Correo debe tener máximo 70 caracteres")
+        if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", valor):
+            raise ValueError("Correo inválido. Debe tener un formato válido (ejemplo@dominio.com)")
+
+    def validar_telefono(self, valor):
+        if len(valor) > 15:
+            raise ValueError("Teléfono debe tener máximo 15 caracteres")
+        if not valor.isdigit():
+            raise ValueError("Teléfono debe contener solo dígitos")
+
+    def validar_rut(self, valor):
+        if len(valor) > 20:
+            raise ValueError("RUT debe tener máximo 20 caracteres")
+        if not re.match(r"^\d{1,2}\.\d{3}\.\d{3}[-][0-9kK]{1}$", valor):
+            raise ValueError("RUT inválido. Formato esperado: 12.345.678-9")
 
     def buscar_huesped(self):
         buscar = self.buscar.get()
@@ -118,17 +129,14 @@ class GestionHuespedes(tk.Toplevel):
                                                     huesped['numero'], huesped['rut']))
     
     def agregar_huesped(self):
-        if not self.validar_inputs():
-            messagebox.showerror("Error", "Todos los campos son obligatorios")
-            return
-        
-        nuevo_huesped = [self.inputs[campo].get() for campo in self.campos]
-        if self.db.agregar_huespedes(*nuevo_huesped):
-            self.cargar_datos()
-            self.limpiar_campos()
-            messagebox.showinfo("Exito", "Huésped agregado correctamente")
-        else:
-            messagebox.showerror("Error", "No se pudo agregar al huesped")
+        if self.validar_inputs():
+            nuevo_huesped = [self.inputs[campo].get() for campo in self.campos]
+            if self.db.agregar_huespedes(*nuevo_huesped):
+                self.cargar_datos()
+                self.limpiar_campos()
+                messagebox.showinfo("Exito", "Huésped agregado correctamente")
+            else:
+                messagebox.showerror("Error", "No se pudo agregar al huesped")
 
     def eliminar_huesped(self):
         eliminar = self.tree.selection()
