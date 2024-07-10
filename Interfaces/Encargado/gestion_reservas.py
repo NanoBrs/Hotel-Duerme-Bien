@@ -93,7 +93,7 @@ class GestionReservas(tk.Frame):
         self.ninos_spin = tk.Spinbox(parent, from_=0, to=10)
         self.ninos_spin.place(x=345, y=330, width=100)
 
-        tk.Label(parent, text="ID Habitación").place(x=5, y=370)
+        tk.Label(parent, text="Habitacion seleccionada").place(x=5, y=370)
         self.id_habitacion_entry = tk.Entry(parent, state='readonly')
         self.id_habitacion_entry.place(x=145, y=370, width=150)
 
@@ -128,7 +128,7 @@ class GestionReservas(tk.Frame):
             height=10  # Número de filas visibles, puedes ajustarlo según tus necesidades
         )
         self.habitaciones_table.heading('ID', text='ID')
-        self.habitaciones_table.heading('Numero', text='Número de Habitación')
+        self.habitaciones_table.heading('Numero', text='Numero de Habitacion')
         self.habitaciones_table.heading('Precio', text='Precio por Noche')
         self.habitaciones_table.heading('Camas', text='Camas')
         self.habitaciones_table.heading('Piso', text='Piso')
@@ -137,13 +137,13 @@ class GestionReservas(tk.Frame):
         self.habitaciones_table.heading('Orientacion', text='Orientación')
         self.habitaciones_table.heading('Estado', text='Estado')
         #columnas
-        self.habitaciones_table.column('ID', width=50)
-        self.habitaciones_table.column('Numero', width=100)
-        self.habitaciones_table.column('Precio', width=80)
+        self.habitaciones_table.column('ID', width=30)
+        self.habitaciones_table.column('Numero', width=135)
+        self.habitaciones_table.column('Precio', width=100)
         self.habitaciones_table.column('Camas', width=50)
         self.habitaciones_table.column('Piso', width=50)
         self.habitaciones_table.column('Capacidad', width=80)
-        self.habitaciones_table.column('Tipo', width=100)
+        self.habitaciones_table.column('Tipo', width=105)
         self.habitaciones_table.column('Orientacion', width=72)
         self.habitaciones_table.column('Estado', width=80)
 
@@ -152,6 +152,10 @@ class GestionReservas(tk.Frame):
         scrollbar_horizontal = ttk.Scrollbar(parent, orient=tk.HORIZONTAL, command=self.habitaciones_table.xview)
         self.habitaciones_table.configure(xscroll=scrollbar_horizontal.set)
         scrollbar_horizontal.place(x=625, y=305, width=300)
+
+        # Vincular el evento de doble clic
+        self.habitaciones_table.bind("<Double-1>", self.cargar_datos_seleccionados)
+
 
     def cargar_reservas(self):
         rows = self.db.cargar_reservas()
@@ -236,4 +240,12 @@ class GestionReservas(tk.Frame):
         except Exception as e:
             messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
 
+    def cargar_datos_seleccionados(self, event):
+        selected_item = self.habitaciones_table.selection()[0]
+        habitacion_id = self.habitaciones_table.item(selected_item, 'values')[0]
+        numero_habitacion = self.habitaciones_table.item(selected_item, 'values')[1]
+        self.id_habitacion_entry.config(state='normal')
+        self.id_habitacion_entry.delete(0, tk.END)
+        self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}, Número: {numero_habitacion}")
+        self.id_habitacion_entry.config(state='readonly')
 
