@@ -105,10 +105,10 @@ class GestionReservas(tk.Frame):
         self.combo_tipo_habitacion.place(x=145, y=410, width=150)
         self.cargar_tipos_habitacion()
 
-        tk.Button(parent, text="Reservar", command=self.registrar_reserva).place(x=200, y=450, width=100)
+        tk.Button(parent, text="Reservar", command=self.registrar_reserva).place(x=300, y=365, width=100)
 
         # Botón Buscar Habitaciones
-        tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=315, y=450, width=150)
+        tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=415, y=365, width=150)
 
         # Tabla para mostrar las reservas
         self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"),height=10, show="headings")
