@@ -124,7 +124,7 @@ class GestionReservas(tk.Frame):
         self.tree.column('Fecha de Salida', width=60)
         self.tree.column('Tipo de Habitación', width=80)
         self.tree.column('Precio Total', width=50)
-        self.tree.place(x=5, y=500, width=500, height=90)  # Ajustar la posición y tamaño de la tabla
+        self.tree.place(x=5, y=400, width=500, height=170)  # Ajustar la posición y tamaño de la tabla
         # Cargar las reservas existentes
         self.cargar_reservas()
 
