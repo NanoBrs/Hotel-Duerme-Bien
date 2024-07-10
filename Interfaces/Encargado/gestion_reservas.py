@@ -125,7 +125,7 @@ class GestionReservas(tk.Frame):
             parent,
             columns=('ID', 'Numero', 'Precio', 'Camas', 'Piso', 'Capacidad', 'Tipo', 'Orientacion', 'Estado'),
             show='headings',  # Para mostrar solo las cabeceras de las columnas
-            height=8  # Número de filas visibles, puedes ajustarlo según tus necesidades
+            height=10  # Número de filas visibles, puedes ajustarlo según tus necesidades
         )
         self.habitaciones_table.heading('ID', text='ID')
         self.habitaciones_table.heading('Numero', text='Número de Habitación')
@@ -136,13 +136,22 @@ class GestionReservas(tk.Frame):
         self.habitaciones_table.heading('Tipo', text='Tipo de Habitación')
         self.habitaciones_table.heading('Orientacion', text='Orientación')
         self.habitaciones_table.heading('Estado', text='Estado')
+        #columnas
+        self.habitaciones_table.column('ID', width=50)
+        self.habitaciones_table.column('Numero', width=100)
+        self.habitaciones_table.column('Precio', width=80)
+        self.habitaciones_table.column('Camas', width=50)
+        self.habitaciones_table.column('Piso', width=50)
+        self.habitaciones_table.column('Capacidad', width=80)
+        self.habitaciones_table.column('Tipo', width=100)
+        self.habitaciones_table.column('Orientacion', width=72)
+        self.habitaciones_table.column('Estado', width=80)
 
-        self.habitaciones_table.place(x=625, y=120, width=350, height=200)  # Ajustar la posición y tamaño de la tabla
+        self.habitaciones_table.place(x=625, y=120, width=300, height=200)  # Ajustar la posición y tamaño de la tabla
 
-        # Scrollbar para la tabla de habitaciones
-        scrollbar = ttk.Scrollbar(parent, orient=tk.VERTICAL, command=self.habitaciones_table.yview)
-        self.habitaciones_table.configure(yscroll=scrollbar.set)
-        scrollbar.place(x=975, y=120, height=200)  # Ajustar la posición del scrollbar
+        scrollbar_horizontal = ttk.Scrollbar(parent, orient=tk.HORIZONTAL, command=self.habitaciones_table.xview)
+        self.habitaciones_table.configure(xscroll=scrollbar_horizontal.set)
+        scrollbar_horizontal.place(x=625, y=305, width=300)
 
     def cargar_reservas(self):
         rows = self.db.cargar_reservas()
