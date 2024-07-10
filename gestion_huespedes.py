@@ -48,7 +48,8 @@ class GestionHuespedes(tk.Toplevel):
         self.buscar = ttk.Entry(buscar_frame, width = 40)
         self.buscar.pack(side = tk.LEFT, padx = 5)
         ttk.Button(buscar_frame, text = "Buscar", command = self.buscar_huesped).pack(side = tk.LEFT, padx = 5)
-        
+        #Boton Restablecer
+        ttk.Button(buscar_frame, text="Restablecer", command = self.restablecer_lista).pack(side = tk.LEFT, padx = 5)
         # Lista de huéspedes
         self.tree = ttk.Treeview(main_frame, columns = ["ID"] + self.campos, show = 'headings')
         self.tree.heading("ID", text = "ID")
@@ -116,17 +117,36 @@ class GestionHuespedes(tk.Toplevel):
 
     def buscar_huesped(self):
         buscar = self.buscar.get()
+        if not buscar:
+            messagebox.showwarning("Búsqueda vacía", "Por favor, ingrese un termino de busqueda")
+            return
+        
         resultado = self.db.buscar_huespedes(buscar)
         
+        
+        if not resultado:
+            messagebox.showwarning("Húesped no encontrado", f"No se encontraron huéspedes que coincidan con '{buscar}'")
+            return
+        
         #Limpia la vista actual
-        for item in self.tree.get_children():
-            self.tree.delete(item)
+        else:
+            for item in self.tree.get_children():
+                self.tree.delete(item)
         
         #Muestra los resultados
         for huesped in resultado:
-            self.tree.insert('', tk.END, values =  (huesped['id'], huesped['nombre'], huesped['apellido1'], 
+            self.tree.insert('', tk.END, values =  (huesped['id_huesped'], huesped['nombre'], huesped['apellido1'], 
                                                     huesped['apellido2'], huesped['correo'], 
                                                     huesped['numero'], huesped['rut']))
+    
+    def restablecer_lista(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        self.cargar_datos()
+        
+        self.buscar.delete(0, tk.END)
+        messagebox.showinfo("Lista restablecida", "Se ha restablecido la lista completa de huéspedes")
     
     def agregar_huesped(self):
         if self.validar_inputs():
@@ -151,7 +171,7 @@ class GestionHuespedes(tk.Toplevel):
                     self.tree.delete(item)
                 else:
                     messagebox.showerror(f"No se pudo eliminar el huesped con ID {id}")
-
+    
     def huesped_select(self, evento):
         item = self.tree.selection()[0]
         valores = self.tree.item(item, "values")
