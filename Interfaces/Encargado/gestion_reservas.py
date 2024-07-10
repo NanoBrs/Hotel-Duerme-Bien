@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
-from datetime import datetime
+from datetime import datetime, date
 from DAO.DAO_reserva import Database_reserva
+
+USUARIO = 1  # ID del usuario actual que está registrando la reserva
 
 class GestionReservas(tk.Frame):
     def __init__(self, parent, controlador):
@@ -109,14 +111,20 @@ class GestionReservas(tk.Frame):
         tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=315, y=450, width=150)
 
         # Tabla para mostrar las reservas
-        self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"), show="headings")
+        self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"),height=10, show="headings")
         self.tree.heading("ID Usuario", text="ID Usuario")
         self.tree.heading("Fecha de Llegada", text="Fecha de Llegada")
         self.tree.heading("Fecha de Salida", text="Fecha de Salida")
         self.tree.heading("Tipo de Habitación", text="Tipo de Habitación")
         self.tree.heading("Precio Total", text="Precio Total")
-        self.tree.place(x=5, y=500, width=950, height=90)
-
+        
+        #columnas
+        self.tree.column('ID Usuario', width=30)
+        self.tree.column('Fecha de Llegada', width=60)
+        self.tree.column('Fecha de Salida', width=60)
+        self.tree.column('Tipo de Habitación', width=80)
+        self.tree.column('Precio Total', width=50)
+        self.tree.place(x=5, y=500, width=500, height=90)  # Ajustar la posición y tamaño de la tabla
         # Cargar las reservas existentes
         self.cargar_reservas()
 
@@ -125,7 +133,7 @@ class GestionReservas(tk.Frame):
             parent,
             columns=('ID', 'Numero', 'Precio', 'Camas', 'Piso', 'Capacidad', 'Tipo', 'Orientacion', 'Estado'),
             show='headings',  # Para mostrar solo las cabeceras de las columnas
-            height=10  # Número de filas visibles, puedes ajustarlo según tus necesidades
+            height=20  # Número de filas visibles, puedes ajustarlo según tus necesidades
         )
         self.habitaciones_table.heading('ID', text='ID')
         self.habitaciones_table.heading('Numero', text='Numero de Habitacion')
@@ -158,6 +166,8 @@ class GestionReservas(tk.Frame):
 
 
     def cargar_reservas(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
         rows = self.db.cargar_reservas()
         for row in rows:
             self.tree.insert("", "end", values=(row['id_reserva'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total'], row['estado_habitacion']))
@@ -186,20 +196,51 @@ class GestionReservas(tk.Frame):
 
     def registrar_reserva(self):
         try:
+            id_usuario = USUARIO
             rut_huesped = self.rut_huesped_entry.get()
+            
             fecha_entrada = self.cal_entrada.get_date()
             fecha_salida = self.cal_salida.get_date()
-            cant_adultos = self.adultos_spin.get()
-            cant_ninos = self.ninos_spin.get()
-            tipo_habitacion = self.combo_tipo_habitacion.get()
-            tipo_habitacion_id = [k for k, v in self.tipo_habitacion_dict.items() if v == tipo_habitacion][0]
-            
-            reserva_exitosa = self.db.registrar_reserva(rut_huesped, fecha_entrada, fecha_salida, cant_adultos, cant_ninos, tipo_habitacion_id)
-            
-            if reserva_exitosa:
-                messagebox.showinfo("Reserva Registrada", "La reserva ha sido registrada exitosamente.")
-            else:
-                messagebox.showerror("Error", "No se pudo registrar la reserva.")
+            habitacion_seleccionada = self.id_habitacion_entry.get()
+
+            if not rut_huesped or not fecha_entrada or not fecha_salida or not habitacion_seleccionada:
+                messagebox.showerror("Error", "Todos los campos son obligatorios.")
+                return
+
+            id_huesped = self.db.obtener_id_por_rut(rut_huesped)
+            if not id_huesped:
+                messagebox.showerror("Error", "El RUT ingresado no es válido.")
+                return
+
+            # Convertir fechas de string a objetos date
+            fecha_entrada = datetime.strptime(fecha_entrada, '%Y-%m-%d').date()
+            fecha_salida = datetime.strptime(fecha_salida, '%Y-%m-%d').date()
+
+            if fecha_salida <= fecha_entrada:
+                messagebox.showerror("Error", "La fecha de salida debe ser despues a la fecha de entrada.")
+                return
+            noches = (fecha_salida - fecha_entrada).days
+            precio_total = 0
+
+            print("Habitaciones seleccionadas:", self.habitaciones_seleccionadas)
+            for hab in self.habitaciones_seleccionadas:
+                habitacion = self.db.cargar_habitacion_por_id(hab['id'])
+                precio_total += habitacion[0]['precio_noche'] * noches
+
+            # Insertar la reserva
+            id_reserva = self.db.insert_reserva(fecha_entrada, fecha_salida,id_usuario, precio_total)  # Precio total temporalmente en 0
+
+            # Insertar detalle de la reserva
+            hora_actual = datetime.now().time().strftime('%H:%M:%S')
+            id_detalle_reserva = self.db.insert_detalle_reserva(id_reserva, habitacion_seleccionada.split(",")[0].split(":")[1].strip(), hora_actual)
+
+            # Insertar detalle del huésped
+            self.db.insert_detalle_huesped(id_reserva, id_huesped, id_detalle_reserva)
+
+            self.db.actualizar_estado_habitacion(habitacion_seleccionada.split(",")[0].split(":")[1].strip(), 'Ocupada')
+            self.cargar_reservas()
+            self.limpiar_inputs()
+            messagebox.showinfo("Reserva Registrada", "La reserva ha sido registrada exitosamente.")
         except Exception as e:
             messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
 
@@ -207,9 +248,14 @@ class GestionReservas(tk.Frame):
         try:
             fecha_entrada = self.cal_entrada.get_date()
             fecha_salida = self.cal_salida.get_date()
+            if fecha_salida <= fecha_entrada:
+                messagebox.showerror("Error", "La fecha de salida debe ser despues a la fecha de entrada.")
+                return
             tipo_habitacion = self.combo_tipo_habitacion.get()
-
-            # Obtener el ID del tipo de habitación
+            if not tipo_habitacion:
+                messagebox.showerror("Error", "Por favor, seleccione un tipo de habitacion.")
+                return
+            # Obtener el ID del tipo de habitaciónf
             tipo_habitacion_id = [k for k, v in self.tipo_habitacion_dict.items() if v == tipo_habitacion][0]
 
             # Limpiar tabla antes de buscar
@@ -244,8 +290,21 @@ class GestionReservas(tk.Frame):
         selected_item = self.habitaciones_table.selection()[0]
         habitacion_id = self.habitaciones_table.item(selected_item, 'values')[0]
         numero_habitacion = self.habitaciones_table.item(selected_item, 'values')[1]
+        self.habitaciones_seleccionadas.append({'id': habitacion_id, 'numero': numero_habitacion})
         self.id_habitacion_entry.config(state='normal')
         self.id_habitacion_entry.delete(0, tk.END)
-        self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}, Número: {numero_habitacion}")
+        self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
         self.id_habitacion_entry.config(state='readonly')
 
+    def limpiar_inputs(self):
+        self.rut_huesped_entry.delete(0, tk.END)
+        self.adultos_spin.delete(0, tk.END)
+        self.adultos_spin.insert(0, 1)
+        self.ninos_spin.delete(0, tk.END)
+        self.ninos_spin.insert(0, 0)
+        self.id_habitacion_entry.config(state='normal')
+        self.id_habitacion_entry.delete(0, tk.END)
+        self.id_habitacion_entry.config(state='readonly')
+        self.combo_tipo_habitacion.set('')
+        for item in self.habitaciones_table.get_children():
+            self.habitaciones_table.delete(item)

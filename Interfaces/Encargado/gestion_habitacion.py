@@ -280,3 +280,4 @@ class GestionHabitaciones(tk.Frame):
             self.tipo_habitacion_var.set(values[6])
             self.orientacion_var.set(values[7])
             self.estado_habitacion_var.set(values[8])
+
