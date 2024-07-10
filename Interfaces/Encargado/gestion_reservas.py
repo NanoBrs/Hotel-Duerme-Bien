@@ -49,6 +49,23 @@ class GestionReservas(tk.Frame):
         # Botón Cerrar Sesión
         self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=self.cerrar_sesion, style="rounded.TButton")
         self.boton_cerrar_sesion.place(x=1055, y=566, width=165, height=45)
+
+    def mostrar_gestion_habitaciones(self):
+        self.controlador.mostrar_frame("GestionHabitaciones")
+
+    def mostrar_gestion_huespedes(self):
+        self.controlador.mostrar_frame("GestionHuespedes")
+
+    def mostrar_gestion_reservas(self):
+        self.controlador.mostrar_frame("GestionReservas")
+
+    def cerrar_sesion(self):
+        print("Sesión cerrada exitosamente.")
+        messagebox.showinfo("Cerrar Sesion", "Sesión cerrada exitosamente.")
+        self.controlador.mostrar_frame("Login")
+
+    def volver_menu_encargado(self):
+        self.controlador.mostrar_frame("VentanaEncargado")
         #--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
 
     def generar_ventana(self, parent):
@@ -210,14 +227,4 @@ class GestionReservas(tk.Frame):
         except Exception as e:
             messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
 
-    def mostrar_gestion_habitaciones(self):
-        self.controlador.mostrar_gestion_habitaciones()
 
-    def mostrar_gestion_huespedes(self):
-        self.controlador.mostrar_gestion_huespedes()
-
-    def mostrar_gestion_reservas(self):
-        self.controlador.mostrar_gestion_reservas()
-
-    def cerrar_sesion(self):
-        self.controlador.mostrar_inicio()
