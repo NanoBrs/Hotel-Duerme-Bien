@@ -309,12 +309,16 @@ class GestionReservas(tk.Frame):
             valores = self.tree.item(selected_item, "values")
             id_reserva, fecha_llegada, fecha_salida, tipo_habitacion, precio_total, estado_habitacion = valores
 
-            # Aquí debes cargar los datos en los campos correspondientes del formulario
+                # Aquí debes cargar los datos en los campos correspondientes del formulario
             self.rut_huesped_entry.delete(0, tk.END)
             self.rut_huesped_entry.insert(0, id_reserva)  # Este es un ejemplo, debes cargar el RUT del huésped real
 
-            self.cal_entrada.set_date(fecha_llegada)
-            self.cal_salida.set_date(fecha_salida)
+                # Convertir las fechas a un formato aceptado por el widget Calendar
+            fecha_llegada_formateada = datetime.strptime(fecha_llegada, '%Y-%m-%d').date()
+            fecha_salida_formateada = datetime.strptime(fecha_salida, '%Y-%m-%d').date()
+                
+            self.cal_entrada.selection_set(fecha_llegada_formateada)
+            self.cal_salida.selection_set(fecha_salida_formateada)
 
             self.combo_tipo_habitacion.set(tipo_habitacion)
             self.id_habitacion_entry.config(state=tk.NORMAL)
