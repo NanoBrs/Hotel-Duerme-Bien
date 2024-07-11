@@ -110,7 +110,8 @@ class GestionReservas(tk.Frame):
         # Botón Buscar Habitaciones
         tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=315, y=450, width=150)
         
-
+        # Botón Modificar Reserva
+        tk.Button(parent, text="Modificar Reserva", command=self.modificar_reserva ).place(x=480, y=450, width=150)
 
         # Botón Eliminar Reserva
         tk.Button(parent, text="Eliminar Reserva", command=self.eliminar_reserva).place(x=645, y=450, width=150)
@@ -132,6 +133,7 @@ class GestionReservas(tk.Frame):
         self.tree.place(x=5, y=500, width=500, height=90)  # Ajustar la posición y tamaño de la tabla
         # Cargar las reservas existentes
         self.cargar_reservas()
+        self.tree.bind("<Double-1>", self.cargar_datos_seleccionados)
 
         # Tabla para mostrar las habitaciones
         self.habitaciones_table = ttk.Treeview(
@@ -301,6 +303,8 @@ class GestionReservas(tk.Frame):
         self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
         self.id_habitacion_entry.config(state='readonly')
 
+    
+
     def limpiar_inputs(self):
         self.rut_huesped_entry.delete(0, tk.END)
         self.adultos_spin.delete(0, tk.END)
@@ -314,14 +318,17 @@ class GestionReservas(tk.Frame):
         for item in self.habitaciones_table.get_children():
             self.habitaciones_table.delete(item)
             
-    def eliminar_reserva(self):
-        if not self.reserva_seleccionada:
-            messagebox.showerror("Error", "Debe seleccionar una reserva para eliminar.")
-            return
+    def modificar_reservas(self):   
+        return
         
-        if messagebox.askyesno("Confirmar", "¿Está seguro de que desea eliminar la reserva seleccionada?"):
-            if self.db.eliminar_reserva(self.reserva_seleccionada):
-                self.cargar_reservas()
-                messagebox.showinfo("Éxito", "Reserva eliminada exitosamente.")
-            else:
-                messagebox.showerror("Error", "Ocurrió un error al eliminar la reserva.")
+            
+    def eliminar_reserva(self):
+        item = self.tree.selection()
+        if item:
+            id_detalle_reserva = self.tree.item(item, "values")[0]
+            self.db.eliminar_reserva(id_detalle_reserva)
+            self.cargar_reservas()
+            messagebox.showinfo("Reserva Eliminada", "Reserva eliminada exitosamente.")
+        else:
+            messagebox.showwarning("Selección Vacía", "Por favor, selecciona una reserva para eliminar.")
+   
