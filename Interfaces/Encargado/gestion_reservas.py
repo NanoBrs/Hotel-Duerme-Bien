@@ -111,7 +111,7 @@ class GestionReservas(tk.Frame):
         tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=315, y=450, width=150)
         
         # Botón Modificar Reserva
-        tk.Button(parent, text="Modificar Reserva" ).place(x=480, y=450, width=150)
+        tk.Button(parent, text="Modificar Reserva", command=self.modificar_reserva).place(x=480, y=450, width=150)
 
         # Botón Eliminar Reserva
         tk.Button(parent, text="Eliminar Reserva", command=self.eliminar_reserva).place(x=645, y=450, width=150)
@@ -308,22 +308,17 @@ class GestionReservas(tk.Frame):
         if selected_item:
             valores = self.tree.item(selected_item, "values")
             id_reserva, fecha_llegada, fecha_salida, tipo_habitacion, precio_total, estado_habitacion = valores
-
-                # Aquí debes cargar los datos en los campos correspondientes del formulario
             self.rut_huesped_entry.delete(0, tk.END)
-            self.rut_huesped_entry.insert(0, id_reserva)  # Este es un ejemplo, debes cargar el RUT del huésped real
-
-                # Convertir las fechas a un formato aceptado por el widget Calendar
+            self.rut_huesped_entry.insert(0, id_reserva) 
+            # Convertir las fechas a n formato aceptado por el widget Calendar
             fecha_llegada_formateada = datetime.strptime(fecha_llegada, '%Y-%m-%d').date()
             fecha_salida_formateada = datetime.strptime(fecha_salida, '%Y-%m-%d').date()
-                
             self.cal_entrada.selection_set(fecha_llegada_formateada)
             self.cal_salida.selection_set(fecha_salida_formateada)
-
             self.combo_tipo_habitacion.set(tipo_habitacion)
             self.id_habitacion_entry.config(state=tk.NORMAL)
             self.id_habitacion_entry.delete(0, tk.END)
-            self.id_habitacion_entry.insert(0, tipo_habitacion)  # Este es un ejemplo, debes cargar el ID de habitación real
+            self.id_habitacion_entry.insert(0, tipo_habitacion) 
             self.id_habitacion_entry.config(state='readonly')
 
             # Asegúrate de cargar los demás datos necesarios en el formulario
@@ -358,10 +353,10 @@ class GestionReservas(tk.Frame):
 
             # Realizar la actualización en la base de datos
             self.db.modificar_reserva(id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion)
-            
-            # Recargar las reservas en la tabla
             self.cargar_reservas()
             
+            
+    
     def eliminar_reserva(self):
         selected_item = self.tree.focus()
         if selected_item:
@@ -370,6 +365,13 @@ class GestionReservas(tk.Frame):
 
             confirm = messagebox.askyesno("Confirmar Eliminación", "¿Está seguro de que desea eliminar esta reserva?")
             if confirm:
-                # Eliminar la reserva en la base de datos
-                self.db.eliminar_reserva(id_reserva)
-                self.cargar_reservas()
+                try:
+                    resultado = self.eliminar_reserva_completa(id_reserva)
+                    if resultado:
+                        self.cargar_reservas()
+                    else:
+                        messagebox.showerror("Error", "Hubo un error al eliminar la reserva.")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Hubo un error al eliminar la reserva: {e}")
+
+

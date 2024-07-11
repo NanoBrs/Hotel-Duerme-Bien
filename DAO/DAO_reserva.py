@@ -1,9 +1,6 @@
 from DAO.database import Database
 from datetime import date
-
-class Database_reserva:
-    def __init__(self):
-        self.db = Database()
+from tkinter import ttk, messagebox
 
 class Database_reserva:
     def __init__(self):
@@ -92,5 +89,72 @@ class Database_reserva:
     def actualizar_estado_habitacion(self, id_habitacion, nuevo_estado):
         query = "UPDATE habitacion SET id_estado_habitacion = (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s) WHERE id_habitacion = %s"
         self.db.execute_query(query, (nuevo_estado, id_habitacion))
+
+    def modificar_reserva(self, id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion):
+        
+        id_huesped = self.obtener_id_por_rut(nuevo_rut)
+
+        query_reserva = """
+        UPDATE reserva
+        SET fecha_llegada = %s, fecha_salida = %s, id_usuario = %s
+        WHERE id_reserva = %s
+        """
+        self.db.execute_query(query_reserva, (nueva_fecha_llegada, nueva_fecha_salida, id_huesped, id_reserva))
+
+        query_detalle_reserva = """
+        UPDATE detalle_reserva
+        SET id_habitacion = %s
+        WHERE id_reserva = %s
+        """
+        self.db.execute_query(query_detalle_reserva, (nueva_id_habitacion, id_reserva))
+        
+        
+    def obtener_id_habitacion_por_reserva(self, id_reserva):
+        query = "SELECT id_habitacion FROM detalle_reserva WHERE id_reserva = %s"
+        resultado = self.db.fetch_one(query, (id_reserva,))
+        if resultado:
+            return resultado['id_habitacion']
+        else:
+            return None
+
+    def eliminar_detalle_huespedes(self, id_reserva):
+        query = "DELETE FROM detalle_huespedes WHERE id_reserva = %s"
+        return self.db.execute_query(query, (id_reserva,))
+
+    def eliminar_detalle_reserva(self, id_reserva):
+        query = "DELETE FROM detalle_reserva WHERE id_reserva = %s"
+        return self.db.execute_query(query, (id_reserva,))
+
+    def eliminar_reserva(self, id_reserva):
+        query = "DELETE FROM reserva WHERE id_reserva = %s"
+        return self.db.execute_query(query, (id_reserva,))
+
+    def actualizar_estado_habitacion_a_disponible(self, id_habitacion):
+        query = "UPDATE habitacion SET id_estado_habitacion = 1 WHERE id_habitacion = %s"
+        return self.db.execute_query(query, (id_habitacion,))
+
+    def eliminar_reserva_completa(self, id_reserva):
+        try:
+            id_habitacion = self.obtener_id_habitacion_por_reserva(id_reserva)
+            if id_habitacion is None:
+                messagebox.showerror("Error", "No se pudo obtener el id de la habitación.")
+                return None
+            
+            self.eliminar_detalle_huespedes(id_reserva)
+            self.eliminar_detalle_reserva(id_reserva)
+            result = self.eliminar_reserva(id_reserva)
+            
+            self.actualizar_estado_habitacion_a_disponible(id_habitacion)
+
+            if result:
+                messagebox.showwarning("Eliminado", f"Se eliminó la reserva con id: {id_reserva} y la habitación pasó a estar Disponible.")
+            else:
+                messagebox.showerror("Error", "No se pudo eliminar la reserva.")
+
+            return result
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo eliminar la reserva. Error: {e}")
+            return None
+
 
 
