@@ -366,7 +366,7 @@ class GestionReservas(tk.Frame):
             confirm = messagebox.askyesno("Confirmar Eliminación", "¿Está seguro de que desea eliminar esta reserva?")
             if confirm:
                 try:
-                    resultado = self.eliminar_reserva_completa(id_reserva)
+                    resultado = self.db.eliminar_reserva_completa(id_reserva)
                     if resultado:
                         self.cargar_reservas()
                     else:
