@@ -111,7 +111,7 @@ class GestionReservas(tk.Frame):
         tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=315, y=450, width=150)
         
         # Botón Modificar Reserva
-        tk.Button(parent, text="Modificar Reserva", command=self.modificar_reserva ).place(x=480, y=450, width=150)
+        tk.Button(parent, text="Modificar Reserva" ).place(x=480, y=450, width=150)
 
         # Botón Eliminar Reserva
         tk.Button(parent, text="Eliminar Reserva", command=self.eliminar_reserva).place(x=645, y=450, width=150)
@@ -318,9 +318,24 @@ class GestionReservas(tk.Frame):
         for item in self.habitaciones_table.get_children():
             self.habitaciones_table.delete(item)
             
-    def modificar_reservas(self):   
-        return
-        
+    def modificar_reserva(self):
+        selected_item = self.tree.focus()
+        if selected_item:
+            valores = self.tree.item(selected_item, "values")
+            id_reserva = valores[0]
+
+            # Obtener los nuevos valores del formulario
+            nuevo_rut = self.rut_huesped_entry.get()
+            nueva_fecha_llegada = self.cal_entrada.get_date()
+            nueva_fecha_salida = self.cal_salida.get_date()
+            nueva_tipo_habitacion = self.combo_tipo_habitacion.get()
+            nueva_id_habitacion = self.id_habitacion_entry.get()
+
+            # Realizar la actualización en la base de datos
+            self.db.modificar_reserva(id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion)
+            
+            # Recargar las reservas en la tabla
+            self.cargar_reservas()
             
     def eliminar_reserva(self):
         item = self.tree.selection()
@@ -332,3 +347,4 @@ class GestionReservas(tk.Frame):
         else:
             messagebox.showwarning("Selección Vacía", "Por favor, selecciona una reserva para eliminar.")
    
+    
