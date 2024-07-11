@@ -42,11 +42,13 @@ class Database_reserva:
 
     def insert_reserva(self, entrada, salida, id_usuario, precio_total):
         today = date.today()
-        estado_reserva = "Activa" if entrada == today else "Reservada" if entrada > today else "Terminada"
-
-        query_estado_reserva = "INSERT INTO estado_reserva (estado) VALUES (%s)"
-        self.db.execute_query(query_estado_reserva, (estado_reserva,))
-        id_estado_reserva = self.db.cursor.lastrowid
+        if today < entrada:
+            estado_reserva = 2  # Reservada
+        elif entrada <= today <= salida:
+            estado_reserva = 1  # Activa
+        else:
+            estado_reserva = 3  # Terminada
+        id_estado_reserva = estado_reserva
 
         query_reserva = "INSERT INTO reserva (fecha_llegada, fecha_salida, id_usuario, id_estado_reserva, precio_total) VALUES (%s, %s, %s, %s, %s)"
         self.db.execute_query(query_reserva, (entrada, salida, id_usuario, id_estado_reserva, precio_total))
@@ -70,6 +72,14 @@ class Database_reserva:
         JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
         JOIN orientacion o ON h.id_orientacion = o.id_orientacion
         JOIN estado_habitacion eh ON h.id_estado_habitacion = eh.id_estado_habitacion
+        WHERE h.id_habitacion = %s
+        """
+        return self.db.fetch_all(query, (id_habitacion,))
+    
+    def cargar_capacidad_habitacion_por_id(self, id_habitacion):
+        query = """
+        SELECT h.capacidad
+        FROM habitacion h
         WHERE h.id_habitacion = %s
         """
         return self.db.fetch_all(query, (id_habitacion,))

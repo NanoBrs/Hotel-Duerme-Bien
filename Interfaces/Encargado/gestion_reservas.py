@@ -4,8 +4,8 @@ from tkcalendar import Calendar
 from datetime import datetime, date
 from DAO.DAO_reserva import Database_reserva
 
-USUARIO = 1  # ID del usuario actual que está registrando la reserva
-
+USUARIO = 1  # ID del usuario actual que esta registrando la reserva
+Selecionar_habitacion_numero = 0
 class GestionReservas(tk.Frame):
     def __init__(self, parent, controlador):
         tk.Frame.__init__(self, parent)
@@ -62,8 +62,8 @@ class GestionReservas(tk.Frame):
         self.controlador.mostrar_frame("GestionReservas")
 
     def cerrar_sesion(self):
-        print("Sesión cerrada exitosamente.")
-        messagebox.showinfo("Cerrar Sesion", "Sesión cerrada exitosamente.")
+        print("Sesion cerrada exitosamente.")
+        messagebox.showinfo("Cerrar Sesion", "Sesion cerrada exitosamente.")
         self.controlador.mostrar_frame("Login")
 
     def volver_menu_encargado(self):
@@ -71,9 +71,9 @@ class GestionReservas(tk.Frame):
         #--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
 
     def generar_ventana(self, parent):
-        ttk.Label(parent, text="GESTIÓN DE RESERVAS").place(x=5, y=10)
+        ttk.Label(parent, text="GESTION DE RESERVAS").place(x=5, y=10)
         
-        tk.Label(parent, text="RUT Huésped responsable").place(x=5, y=50)
+        tk.Label(parent, text="RUT Huesped responsable").place(x=5, y=50)
         self.rut_huesped_entry = tk.Entry(parent)
         self.rut_huesped_entry.place(x=185, y=50, width=150)
         self.button_verificar = tk.Button(parent, text="Verificar RUT", command=self.verificar_rut)
@@ -81,50 +81,89 @@ class GestionReservas(tk.Frame):
 
         tk.Label(parent, text="Entrada").place(x=5, y=90)
         self.cal_entrada = Calendar(parent, selectmode='day', date_pattern='yyyy-mm-dd')
-        self.cal_entrada.place(x=5, y=120, width=300, height=200)
+        self.cal_entrada.place(x=5, y=120, width=260, height=160)
         
         tk.Label(parent, text="Salida").place(x=315, y=90)
         self.cal_salida = Calendar(parent, selectmode='day', date_pattern='yyyy-mm-dd')
-        self.cal_salida.place(x=315, y=120, width=300, height=200)
+        self.cal_salida.place(x=315, y=120, width=260, height=160)
         
         tk.Label(parent, text="Cantidad de Adultos").place(x=5, y=330)
         self.adultos_spin = tk.Spinbox(parent, from_=1, to=10)
-        self.adultos_spin.place(x=145, y=330, width=100)
+        self.adultos_spin.place(x=145, y=330, width=50)
         
         tk.Label(parent, text="Cantidad de Niños").place(x=255, y=330)
         self.ninos_spin = tk.Spinbox(parent, from_=0, to=10)
-        self.ninos_spin.place(x=345, y=330, width=100)
+        self.ninos_spin.place(x=355, y=330, width=50)
 
-        tk.Label(parent, text="Habitacion seleccionada").place(x=5, y=370)
-        self.id_habitacion_entry = tk.Entry(parent, state='readonly')
-        self.id_habitacion_entry.place(x=145, y=370, width=150)
+        habitacion_1 = tk.Label(parent, text="Habitacion 1 seleccionada")
+        self.id_habitacion_entry_1 = tk.Entry(parent, state='readonly')
 
-        self.label_tipo_habitacion = tk.Label(parent, text="Tipo de Habitación:")
-        self.label_tipo_habitacion.place(x=5, y=410)
+        habitacion_2 = tk.Label(parent, text="Habitacion 2 seleccionada")
+        self.id_habitacion_entry_2 = tk.Entry(parent, state='readonly')
+
+
+        def ocultar_habitacion_1():
+            habitacion_1.place_forget()
+            self.id_habitacion_entry_1.place_forget()
+
+        def ocultar_habitacion_1():
+            habitacion_1.place_forget()
+            self.id_habitacion_entry_1.place_forget()
+
+        def mostrar_habitacion_1():
+            global Selecionar_habitacion_numero
+            Selecionar_habitacion_numero = 1
+            print(f"1:{Selecionar_habitacion_numero}")
+            ocultar_habitacion_2()
+            habitacion_1.place(x=20, y=370)
+            self.id_habitacion_entry_1.place(x=165, y=370, width=150)
+            btn_2.place(x=5, y=370)
+            btn_1.place_forget()
+
+        def ocultar_habitacion_2():
+            habitacion_2.place_forget()
+            self.id_habitacion_entry_2.place_forget()
+
+        def mostrar_habitacion_2():
+            global Selecionar_habitacion_numero
+            Selecionar_habitacion_numero = 2
+            print(f"2:{Selecionar_habitacion_numero}")
+            ocultar_habitacion_1()
+            habitacion_2.place(x=20, y=370)
+            self.id_habitacion_entry_2.place(x=165, y=370, width=150)
+            btn_1.place(x=5, y=370)
+            btn_2.place_forget()
+
+        btn_1 = tk.Button(parent, text="1", command=mostrar_habitacion_1)
+        btn_2 = tk.Button(parent, text="2", command=mostrar_habitacion_2)
+        mostrar_habitacion_1()
+
+        self.label_tipo_habitacion = tk.Label(parent, text="Tipo de Habitacion:")
+        self.label_tipo_habitacion.place(x=5, y=400)
         self.combo_tipo_habitacion = ttk.Combobox(parent)
-        self.combo_tipo_habitacion.place(x=145, y=410, width=150)
+        self.combo_tipo_habitacion.place(x=145, y=400, width=150)
         self.cargar_tipos_habitacion()
 
-        tk.Button(parent, text="Reservar", command=self.registrar_reserva).place(x=300, y=365, width=100)
+        tk.Button(parent, text="Reservar", command=self.registrar_reserva).place(x=320, y=365, width=100)
 
         # Botón Buscar Habitaciones
-        tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=415, y=365, width=150)
+        tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=435, y=365, width=150)
 
         # Tabla para mostrar las reservas
-        self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"),height=10, show="headings")
+        self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitacion", "Precio Total"),height=10, show="headings")
         self.tree.heading("ID Usuario", text="ID Usuario")
         self.tree.heading("Fecha de Llegada", text="Fecha de Llegada")
         self.tree.heading("Fecha de Salida", text="Fecha de Salida")
-        self.tree.heading("Tipo de Habitación", text="Tipo de Habitación")
+        self.tree.heading("Tipo de Habitacion", text="Tipo de Habitacion")
         self.tree.heading("Precio Total", text="Precio Total")
         
         #columnas
         self.tree.column('ID Usuario', width=30)
         self.tree.column('Fecha de Llegada', width=60)
         self.tree.column('Fecha de Salida', width=60)
-        self.tree.column('Tipo de Habitación', width=80)
+        self.tree.column('Tipo de Habitacion', width=80)
         self.tree.column('Precio Total', width=50)
-        self.tree.place(x=5, y=400, width=500, height=170)  # Ajustar la posición y tamaño de la tabla
+        self.tree.place(x=5, y=430, width=500, height=150)  # Ajustar la posición y tamaño de la tabla
         # Cargar las reservas existentes
         self.cargar_reservas()
 
@@ -141,8 +180,8 @@ class GestionReservas(tk.Frame):
         self.habitaciones_table.heading('Camas', text='Camas')
         self.habitaciones_table.heading('Piso', text='Piso')
         self.habitaciones_table.heading('Capacidad', text='Capacidad')
-        self.habitaciones_table.heading('Tipo', text='Tipo de Habitación')
-        self.habitaciones_table.heading('Orientacion', text='Orientación')
+        self.habitaciones_table.heading('Tipo', text='Tipo de Habitacion')
+        self.habitaciones_table.heading('Orientacion', text='Orientacion')
         self.habitaciones_table.heading('Estado', text='Estado')
         #columnas
         self.habitaciones_table.column('ID', width=30)
@@ -174,7 +213,7 @@ class GestionReservas(tk.Frame):
 
     def cargar_tipos_habitacion(self):
         rows = self.db.cargar_tipos_habitacion()
-        tipos = {row['id_tipo_habitacion']: f"{row['tipo']} - Máximo {row['cantidad_maxima']} personas" for row in rows}
+        tipos = {row['id_tipo_habitacion']: f"{row['tipo']} - Maximo {row['cantidad_maxima']} personas" for row in rows}
         self.tipo_habitacion_dict = tipos
         self.combo_tipo_habitacion['values'] = list(tipos.values())
 
@@ -188,20 +227,23 @@ class GestionReservas(tk.Frame):
             huesped_info = self.db.obtener_nombre_apellido_por_rut(rut_huesped)
             if huesped_info:
                 nombre, apellido = huesped_info
-                messagebox.showinfo("Éxito", f"El RUT ingresado es valido.\nNombre: {nombre} \nApellido: {apellido}")
+                messagebox.showinfo("Exito", f"El RUT ingresado es valido.\nNombre: {nombre} \nApellido: {apellido}")
             else:
                 messagebox.showerror("Error", "El RUT ingresado no es valido.")
         except Exception as e:
-            messagebox.showerror("Error", f"Algo salió mal: {e}")
+            messagebox.showerror("Error", f"Algo salio mal: {e}")
 
     def registrar_reserva(self):
         try:
             id_usuario = USUARIO
             rut_huesped = self.rut_huesped_entry.get()
-            
             fecha_entrada = self.cal_entrada.get_date()
             fecha_salida = self.cal_salida.get_date()
-            habitacion_seleccionada = self.id_habitacion_entry.get()
+            habitacion_seleccionada = self.id_habitacion_entry_1.get()
+            adultos = int(self.adultos_spin.get())
+            ninos = int(self.ninos_spin.get())
+            total_personas = adultos + ninos
+            print(total_personas)
 
             if not rut_huesped or not fecha_entrada or not fecha_salida or not habitacion_seleccionada:
                 messagebox.showerror("Error", "Todos los campos son obligatorios.")
@@ -209,7 +251,68 @@ class GestionReservas(tk.Frame):
 
             id_huesped = self.db.obtener_id_por_rut(rut_huesped)
             if not id_huesped:
-                messagebox.showerror("Error", "El RUT ingresado no es válido.")
+                messagebox.showerror("Error", "El RUT ingresado D es válido.")
+                return
+
+            # Convertir fechas de string a objetos date
+            fecha_entrada = datetime.strptime(fecha_entrada, '%Y-%m-%d').date()
+            fecha_salida = datetime.strptime(fecha_salida, '%Y-%m-%d').date()
+
+            if fecha_salida <= fecha_entrada:
+                messagebox.showerror("Error", "La fecha de salida debe ser después de la fecha de entrada.")
+                return
+            noches = (fecha_salida - fecha_entrada).days
+            precio_total = 0
+
+            # Verificar la capacidad de la habitación seleccionada
+            habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
+            habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
+
+            if total_personas > habitacion['capacidad']:
+                messagebox.showerror("Error", f"La cantidad de personas ({total_personas}) supera la capacidad de la habitaci0n ({habitacion['capacidad']})\nSelecciona otra habitacion mas.")
+                return
+
+            # Calcular el precio total de la reserva
+            for hab in self.habitaciones_seleccionadas:
+                habitacion_1 = self.db.cargar_habitacion_por_id(hab['id'])[0]
+                precio_total += habitacion_1['precio_noche'] * noches
+            print(precio_total)
+
+
+            # Insertar la reserva
+            id_reserva = self.db.insert_reserva(fecha_entrada, fecha_salida, id_usuario, precio_total)
+
+            # Insertar detalle de la reserva
+            hora_actual = datetime.now().time().strftime('%H:%M:%S')
+            id_detalle_reserva = self.db.insert_detalle_reserva(id_reserva, habitacion_id, hora_actual)
+
+            # Insertar detalle del huésped
+            self.db.insert_detalle_huesped(id_reserva, id_huesped, id_detalle_reserva)
+
+            # Actualizar el estado de la habitación
+            self.db.actualizar_estado_habitacion(habitacion_id, 'Ocupada')
+            self.cargar_reservas()
+            self.limpiar_inputs()
+            messagebox.showinfo("Reserva Registrada", "La reserva ha sido registrada exitosamente.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
+        try:
+            id_usuario = USUARIO
+            rut_huesped = self.rut_huesped_entry.get()
+            fecha_entrada = self.cal_entrada.get_date()
+            fecha_salida = self.cal_salida.get_date()
+            habitacion_seleccionada = self.id_habitacion_entry_1.get()
+            adultos = int(self.adultos_spin.get())
+            ninos = int(self.ninos_spin.get())
+            total_personas = adultos + ninos
+
+            if not rut_huesped or not fecha_entrada or not fecha_salida or not habitacion_seleccionada:
+                messagebox.showerror("Error", "Todos los campos son obligatorios.")
+                return
+
+            id_huesped = self.db.obtener_id_por_rut(rut_huesped)
+            if not id_huesped:
+                messagebox.showerror("Error", "El RUT ingresado no es valido.")
                 return
 
             # Convertir fechas de string a objetos date
@@ -222,6 +325,10 @@ class GestionReservas(tk.Frame):
             noches = (fecha_salida - fecha_entrada).days
             precio_total = 0
 
+            #verificamos la capacidad de la habitacion
+            habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
+            habitacion = self.db.cargar_habitacion_por_id(habitacion_id)[0]
+            
             print("Habitaciones seleccionadas:", self.habitaciones_seleccionadas)
             for hab in self.habitaciones_seleccionadas:
                 habitacion = self.db.cargar_habitacion_por_id(hab['id'])
@@ -282,7 +389,7 @@ class GestionReservas(tk.Frame):
                         habitacion['estado']
                     ))
             else:
-                messagebox.showinfo("Habitaciones no encontradas", "No hay habitaciones disponibles para las fechas seleccionadas y el tipo de habitación.")
+                messagebox.showinfo("Habitaciones no encontradas", "No hay habitaciones disponibles para las fechas seleccionadas y el tipo de habitacion.")
         except Exception as e:
             messagebox.showerror("Error", f"Ha ocurrido un error: {str(e)}")
 
@@ -291,10 +398,16 @@ class GestionReservas(tk.Frame):
         habitacion_id = self.habitaciones_table.item(selected_item, 'values')[0]
         numero_habitacion = self.habitaciones_table.item(selected_item, 'values')[1]
         self.habitaciones_seleccionadas.append({'id': habitacion_id, 'numero': numero_habitacion})
-        self.id_habitacion_entry.config(state='normal')
-        self.id_habitacion_entry.delete(0, tk.END)
-        self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
-        self.id_habitacion_entry.config(state='readonly')
+        if Selecionar_habitacion_numero == 1:
+            self.id_habitacion_entry_1.config(state='normal')
+            self.id_habitacion_entry_1.delete(0, tk.END)
+            self.id_habitacion_entry_1.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
+            self.id_habitacion_entry_1.config(state='readonly')
+        elif Selecionar_habitacion_numero == 2:
+            self.id_habitacion_entry_2.config(state='normal')
+            self.id_habitacion_entry_2.delete(0, tk.END)
+            self.id_habitacion_entry_2.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
+            self.id_habitacion_entry_2.config(state='readonly')
 
     def limpiar_inputs(self):
         self.rut_huesped_entry.delete(0, tk.END)
@@ -302,9 +415,12 @@ class GestionReservas(tk.Frame):
         self.adultos_spin.insert(0, 1)
         self.ninos_spin.delete(0, tk.END)
         self.ninos_spin.insert(0, 0)
-        self.id_habitacion_entry.config(state='normal')
-        self.id_habitacion_entry.delete(0, tk.END)
-        self.id_habitacion_entry.config(state='readonly')
+        self.id_habitacion_entry_1.config(state='normal')
+        self.id_habitacion_entry_1.delete(0, tk.END)
+        self.id_habitacion_entry_1.config(state='readonly')
+        self.id_habitacion_entry_2.config(state='normal')
+        self.id_habitacion_entry_2.delete(0, tk.END)
+        self.id_habitacion_entry_2.config(state='readonly')
         self.combo_tipo_habitacion.set('')
         for item in self.habitaciones_table.get_children():
             self.habitaciones_table.delete(item)
