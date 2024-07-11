@@ -109,6 +109,11 @@ class GestionReservas(tk.Frame):
 
         # Botón Buscar Habitaciones
         tk.Button(parent, text="Buscar Habitaciones", command=self.buscar_habitaciones).place(x=315, y=450, width=150)
+        
+
+
+        # Botón Eliminar Reserva
+        tk.Button(parent, text="Eliminar Reserva", command=self.eliminar_reserva).place(x=645, y=450, width=150)
 
         # Tabla para mostrar las reservas
         self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"),height=10, show="headings")
@@ -308,3 +313,15 @@ class GestionReservas(tk.Frame):
         self.combo_tipo_habitacion.set('')
         for item in self.habitaciones_table.get_children():
             self.habitaciones_table.delete(item)
+            
+    def eliminar_reserva(self):
+        if not self.reserva_seleccionada:
+            messagebox.showerror("Error", "Debe seleccionar una reserva para eliminar.")
+            return
+        
+        if messagebox.askyesno("Confirmar", "¿Está seguro de que desea eliminar la reserva seleccionada?"):
+            if self.db.eliminar_reserva(self.reserva_seleccionada):
+                self.cargar_reservas()
+                messagebox.showinfo("Éxito", "Reserva eliminada exitosamente.")
+            else:
+                messagebox.showerror("Error", "Ocurrió un error al eliminar la reserva.")
