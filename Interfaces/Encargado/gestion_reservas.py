@@ -296,11 +296,10 @@ class GestionReservas(tk.Frame):
     def cargar_datos_seleccionados(self, event):
         selected_item = self.habitaciones_table.selection()[0]
         habitacion_id = self.habitaciones_table.item(selected_item, 'values')[0]
-        numero_habitacion = self.habitaciones_table.item(selected_item, 'values')[1]
-        self.habitaciones_seleccionadas.append({'id': habitacion_id, 'numero': numero_habitacion})
+        self.habitaciones_seleccionadas.append({'id': habitacion_id})
         self.id_habitacion_entry.config(state='normal')
         self.id_habitacion_entry.delete(0, tk.END)
-        self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
+        self.id_habitacion_entry.insert(0, habitacion_id)
         self.id_habitacion_entry.config(state='readonly')
 
     def cargar_datos_seleccionados_reserva(self, event):
@@ -350,7 +349,7 @@ class GestionReservas(tk.Frame):
             nueva_fecha_salida = self.cal_salida.get_date()
             nueva_tipo_habitacion = self.combo_tipo_habitacion.get()
             nueva_id_habitacion = self.id_habitacion_entry.get()
-
+            # habitacion_seleccionada.split(",")[0].split(":")[1].strip()
             # Realizar la actualización en la base de datos
             self.db.modificar_reserva(id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion)
             self.cargar_reservas()

@@ -100,7 +100,8 @@ class Database_reserva:
         WHERE id_reserva = %s
         """
         self.db.execute_query(query_reserva, (nueva_fecha_llegada, nueva_fecha_salida, id_huesped, id_reserva))
-
+        print(f"habitacion {nueva_id_habitacion}")
+        print(f"reserva {id_reserva}")
         query_detalle_reserva = """
         UPDATE detalle_reserva
         SET id_habitacion = %s
