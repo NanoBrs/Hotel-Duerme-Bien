@@ -268,11 +268,33 @@ class GestionReservas(tk.Frame):
             precio_total = 0
 
             # Verificar la capacidad de la habitacion seleccionada
-            habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
-            habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
+            if habitacion_seleccionada_2 == "":
+                habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
+                habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
 
-            if total_personas > habitacion['capacidad']:
-                messagebox.showerror("Error", f"La cantidad de personas ({total_personas}) supera la capacidad de la habitaci0n ({habitacion['capacidad']})\nSelecciona otra habitacion mas.")
+                if total_personas > habitacion['capacidad']:
+                    messagebox.showerror("Error", f"La cantidad de personas ({total_personas}) supera la capacidad de la habitaci0n ({habitacion['capacidad']})\nSelecciona otra habitacion mas.")
+                    return
+
+            habitaciones_id = []
+            capacidades = []
+
+            if habitacion_seleccionada:
+                habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
+                habitaciones_id.append(habitacion_id)
+                habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
+                capacidades.append(habitacion['capacidad'])
+
+            if habitacion_seleccionada_2:
+                habitacion_id_2 = habitacion_seleccionada_2.split(",")[0].split(":")[1].strip()
+                habitaciones_id.append(habitacion_id_2)
+                habitacion_2 = self.db.cargar_capacidad_habitacion_por_id(habitacion_id_2)[0]
+                capacidades.append(habitacion_2['capacidad'])
+
+            capacidad_total = sum(capacidades)
+
+            if total_personas > capacidad_total:
+                messagebox.showerror("Error", f"La cantidad de personas ({total_personas}) supera la capacidad combinada de las habitaciones ({capacidad_total}).")
                 return
 
             # Calcular el precio total de la reserva
