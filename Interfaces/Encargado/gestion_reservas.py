@@ -133,7 +133,7 @@ class GestionReservas(tk.Frame):
         self.tree.place(x=5, y=500, width=500, height=90)  # Ajustar la posición y tamaño de la tabla
         # Cargar las reservas existentes
         self.cargar_reservas()
-        self.tree.bind("<Double-1>", self.cargar_datos_seleccionados)
+        self.tree.bind("<Double-1>", self.cargar_datos_seleccionados_reserva)
 
         # Tabla para mostrar las habitaciones
         self.habitaciones_table = ttk.Treeview(
@@ -303,6 +303,27 @@ class GestionReservas(tk.Frame):
         self.id_habitacion_entry.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
         self.id_habitacion_entry.config(state='readonly')
 
+    def cargar_datos_seleccionados_reserva(self, event):
+        selected_item = self.tree.focus()
+        if selected_item:
+            valores = self.tree.item(selected_item, "values")
+            id_reserva, fecha_llegada, fecha_salida, tipo_habitacion, precio_total, estado_habitacion = valores
+
+            # Aquí debes cargar los datos en los campos correspondientes del formulario
+            self.rut_huesped_entry.delete(0, tk.END)
+            self.rut_huesped_entry.insert(0, id_reserva)  # Este es un ejemplo, debes cargar el RUT del huésped real
+
+            self.cal_entrada.set_date(fecha_llegada)
+            self.cal_salida.set_date(fecha_salida)
+
+            self.combo_tipo_habitacion.set(tipo_habitacion)
+            self.id_habitacion_entry.config(state=tk.NORMAL)
+            self.id_habitacion_entry.delete(0, tk.END)
+            self.id_habitacion_entry.insert(0, tipo_habitacion)  # Este es un ejemplo, debes cargar el ID de habitación real
+            self.id_habitacion_entry.config(state='readonly')
+
+            # Asegúrate de cargar los demás datos necesarios en el formulario
+
     
 
     def limpiar_inputs(self):
@@ -338,13 +359,13 @@ class GestionReservas(tk.Frame):
             self.cargar_reservas()
             
     def eliminar_reserva(self):
-        item = self.tree.selection()
-        if item:
-            id_detalle_reserva = self.tree.item(item, "values")[0]
-            self.db.eliminar_reserva(id_detalle_reserva)
-            self.cargar_reservas()
-            messagebox.showinfo("Reserva Eliminada", "Reserva eliminada exitosamente.")
-        else:
-            messagebox.showwarning("Selección Vacía", "Por favor, selecciona una reserva para eliminar.")
-   
-    
+        selected_item = self.tree.focus()
+        if selected_item:
+            valores = self.tree.item(selected_item, "values")
+            id_reserva = valores[0]
+
+            confirm = messagebox.askyesno("Confirmar Eliminación", "¿Está seguro de que desea eliminar esta reserva?")
+            if confirm:
+                # Eliminar la reserva en la base de datos
+                self.db.eliminar_reserva(id_reserva)
+                self.cargar_reservas()
