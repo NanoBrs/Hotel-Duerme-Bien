@@ -273,7 +273,7 @@ class GestionReservas(tk.Frame):
                 habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
 
                 if total_personas > habitacion['capacidad']:
-                    messagebox.showerror("Error", f"La cantidad de personas ({total_personas}) supera la capacidad de la habitaci0n ({habitacion['capacidad']})\nSelecciona otra habitacion mas.")
+                    messagebox.showerror("Error", f"La cantidad de personas ({total_personas}) supera la capacidad de la habitacion ({habitacion['capacidad']})\nSelecciona otra habitacion mas.")
                     return
 
             habitaciones_id = []
@@ -314,13 +314,13 @@ class GestionReservas(tk.Frame):
                 habitacion_id_2 = habitacion_seleccionada_2.split(",")[0].split(":")[1].strip()
                 id_detalle_reserva = self.db.insert_detalle_reserva(id_reserva, habitacion_id_2, hora_actual)
 
-
-
             # Insertar detalle del huesped
             self.db.insert_detalle_huesped(id_reserva, id_huesped, id_detalle_reserva)
 
             # Actualizar el estado de la habitacion
             self.db.actualizar_estado_habitacion(habitacion_id, 'Ocupada')
+            if habitacion_seleccionada_2 != "":
+                self.db.actualizar_estado_habitacion(habitacion_id_2, 'Ocupada')
             self.cargar_reservas()
             self.limpiar_inputs()
             messagebox.showinfo("Reserva Registrada", "La reserva ha sido registrada exitosamente.")
