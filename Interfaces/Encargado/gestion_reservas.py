@@ -374,4 +374,8 @@ class GestionReservas(tk.Frame):
                 except Exception as e:
                     messagebox.showerror("Error", f"Hubo un error al eliminar la reserva: {e}")
 
+                        
+                        
+                
+
 
