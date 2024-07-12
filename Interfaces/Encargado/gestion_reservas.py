@@ -4,9 +4,8 @@ from tkcalendar import Calendar
 from datetime import datetime, date
 from DAO.DAO_reserva import Database_reserva
 
-USUARIO = 1
+USUARIO = 1  # ID del usuario actual que esta registrando la reserva
 Selecionar_habitacion_numero = 0
-capacidad_restante = 0
 class GestionReservas(tk.Frame):
     def __init__(self, parent, controlador):
         tk.Frame.__init__(self, parent)
@@ -18,7 +17,6 @@ class GestionReservas(tk.Frame):
         self.fecha_salida = None
         self.habitaciones_seleccionadas = []
         self.tipo_habitacion_seleccionada = None
-        self.total_personas = 0 
 
         # Agregar imagen de fondo
         self.background_image = tk.PhotoImage(file="img/MENU2.png")
@@ -135,16 +133,6 @@ class GestionReservas(tk.Frame):
             self.id_habitacion_entry_2.place(x=165, y=370, width=150)
             btn_1.place(x=5, y=370)
             btn_2.place_forget()
-            habitacion_seleccionada = self.id_habitacion_entry_1.get()
-            if habitacion_seleccionada:
-                habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
-                habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
-                capacidad_restante = total_personas - habitacion['capacidad']
-                if capacidad_restante < 0:
-                    capacidad_restante = 0
-            else:
-                capacidad_restante = total_personas
-            self.buscar_habitaciones()
 
         btn_1 = tk.Button(parent, text="1", command=mostrar_habitacion_1)
         btn_2 = tk.Button(parent, text="2", command=mostrar_habitacion_2)
@@ -315,6 +303,7 @@ class GestionReservas(tk.Frame):
                 precio_total += habitacion_1['precio_noche'] * noches
             print(precio_total)
 
+
             # Insertar la reserva
             id_reserva = self.db.insert_reserva(fecha_entrada, fecha_salida, id_usuario, precio_total)
 
@@ -359,8 +348,6 @@ class GestionReservas(tk.Frame):
             # Buscar habitaciones disponibles
             habitaciones = self.db.buscar_habitaciones_disponibles(fecha_entrada, fecha_salida, tipo_habitacion_id)
 
-            if Selecionar_habitacion_numero == 2 and capacidad_restante > 0:
-                habitaciones = [hab for hab in habitaciones if hab['capacidad'] >= capacidad_restante]
             # Imprimir las habitaciones para depuracion
             print("Habitaciones devueltas por la base de datos:", habitaciones)
 
