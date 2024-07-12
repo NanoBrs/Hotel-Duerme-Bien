@@ -122,7 +122,7 @@ class GestionHuespedes(tk.Toplevel):
     def volver_menu_encargado(self):
         self.controlador.mostrar_frame("VentanaEncargado")
         pass
-#-----------------------------------------------------------------------------  
+#------------------------------------------------------------------------------ 
     
     #Validaciones
     def validar_inputs(self):
