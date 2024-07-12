@@ -433,7 +433,10 @@ class GestionReservas(tk.Frame):
             nueva_id_habitacion = self.id_habitacion_entry_1.get()
             id_usuario = USUARIO
             hora_actual = datetime.now().time().strftime('%H:%M:%S')
-
+            id_huesped = self.db.obtener_id_por_rut(nuevo_rut)
+            if not id_huesped:
+                messagebox.showerror("Error", "El RUT ingresado es valido.")
+                return
             #transformamos las fechas
             fecha_entrada = datetime.strptime(nueva_fecha_llegada, '%Y-%m-%d').date()
             fecha_salida = datetime.strptime(nueva_fecha_salida, '%Y-%m-%d').date()
