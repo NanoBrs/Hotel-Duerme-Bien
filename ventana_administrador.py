@@ -167,6 +167,7 @@ class GestionEncargados(tk.Frame):
             params = (
                 self.nombre_var.get(),
                 self.apellido_var.get(),
+                self.rut_var.get(),
                 self.correo_var.get(),
                 self.contrasena_var.get()
             )
@@ -181,6 +182,7 @@ class GestionEncargados(tk.Frame):
             params = (
                 self.nombre_var.get(),
                 self.apellido_var.get(),
+                self.rut_var.get(),
                 self.correo_var.get(),
                 self.contrasena_var.get(),
                 self.id_usuario_var.get()
