@@ -101,10 +101,8 @@ class GestionReservas(tk.Frame):
         habitacion_2 = tk.Label(parent, text="Habitacion 2 seleccionada")
         self.id_habitacion_entry_2 = tk.Entry(parent, state='readonly')
 
-
-        def ocultar_habitacion_1():
-            habitacion_1.place_forget()
-            self.id_habitacion_entry_1.place_forget()
+        habitacion_3 = tk.Label(parent, text="Habitacion 3 seleccionada")
+        self.id_habitacion_entry_3 = tk.Entry(parent, state='readonly')
 
         def ocultar_habitacion_1():
             habitacion_1.place_forget()
@@ -115,6 +113,7 @@ class GestionReservas(tk.Frame):
             Selecionar_habitacion_numero = 1
             print(f"1:{Selecionar_habitacion_numero}")
             ocultar_habitacion_2()
+            ocultar_habitacion_3()
             habitacion_1.place(x=20, y=370)
             self.id_habitacion_entry_1.place(x=165, y=370, width=150)
             btn_2.place(x=5, y=370)
@@ -129,13 +128,30 @@ class GestionReservas(tk.Frame):
             Selecionar_habitacion_numero = 2
             print(f"2:{Selecionar_habitacion_numero}")
             ocultar_habitacion_1()
+            ocultar_habitacion_3()
             habitacion_2.place(x=20, y=370)
             self.id_habitacion_entry_2.place(x=165, y=370, width=150)
-            btn_1.place(x=5, y=370)
+            btn_3.place(x=5, y=370)
             btn_2.place_forget()
+
+        def ocultar_habitacion_3():
+            habitacion_3.place_forget()
+            self.id_habitacion_entry_3.place_forget()
+
+        def mostrar_habitacion_3():
+            global Selecionar_habitacion_numero
+            Selecionar_habitacion_numero = 3
+            print(f"3:{Selecionar_habitacion_numero}")
+            ocultar_habitacion_1()
+            ocultar_habitacion_2()
+            habitacion_3.place(x=20, y=370)
+            self.id_habitacion_entry_3.place(x=165, y=370, width=150)
+            btn_1.place(x=5, y=370)
+            btn_3.place_forget()
 
         btn_1 = tk.Button(parent, text="1", command=mostrar_habitacion_1)
         btn_2 = tk.Button(parent, text="2", command=mostrar_habitacion_2)
+        btn_3 = tk.Button(parent, text="3", command=mostrar_habitacion_3)
         mostrar_habitacion_1()
 
         self.label_tipo_habitacion = tk.Label(parent, text="Tipo de Habitacion:")
@@ -241,8 +257,10 @@ class GestionReservas(tk.Frame):
             fecha_salida = self.cal_salida.get_date()
             habitacion_seleccionada = self.id_habitacion_entry_1.get()
             habitacion_seleccionada_2 = self.id_habitacion_entry_2.get()
+            habitacion_seleccionada_3 = self.id_habitacion_entry_3.get()
             print(f"1:{habitacion_seleccionada}")
             print(f"2:{habitacion_seleccionada_2}")
+            print(f"3:{habitacion_seleccionada_3}")
             adultos = int(self.adultos_spin.get())
             ninos = int(self.ninos_spin.get())
             total_personas = adultos + ninos
@@ -261,6 +279,9 @@ class GestionReservas(tk.Frame):
             fecha_entrada = datetime.strptime(fecha_entrada, '%Y-%m-%d').date()
             fecha_salida = datetime.strptime(fecha_salida, '%Y-%m-%d').date()
 
+            if fecha_salida == fecha_entrada:
+                messagebox.showerror("Error", "La fecha de salida no puede ser igual a la fecha de entrada.")
+                return
             if fecha_salida <= fecha_entrada:
                 messagebox.showerror("Error", "La fecha de salida debe ser despues de la fecha de entrada.")
                 return
@@ -268,7 +289,7 @@ class GestionReservas(tk.Frame):
             precio_total = 0
 
             # Verificar la capacidad de la habitacion seleccionada
-            if habitacion_seleccionada_2 == "":
+            if habitacion_seleccionada_2 == "" and habitacion_seleccionada_3=="":
                 habitacion_id = habitacion_seleccionada.split(",")[0].split(":")[1].strip()
                 habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
 
@@ -284,12 +305,16 @@ class GestionReservas(tk.Frame):
                 habitaciones_id.append(habitacion_id)
                 habitacion = self.db.cargar_capacidad_habitacion_por_id(habitacion_id)[0]
                 capacidades.append(habitacion['capacidad'])
-
             if habitacion_seleccionada_2:
                 habitacion_id_2 = habitacion_seleccionada_2.split(",")[0].split(":")[1].strip()
                 habitaciones_id.append(habitacion_id_2)
                 habitacion_2 = self.db.cargar_capacidad_habitacion_por_id(habitacion_id_2)[0]
                 capacidades.append(habitacion_2['capacidad'])
+            if habitacion_seleccionada_3:
+                habitacion_id_3 = habitacion_seleccionada_3.split(",")[0].split(":")[1].strip()
+                habitaciones_id.append(habitacion_id_3)
+                habitacion_3 = self.db.cargar_capacidad_habitacion_por_id(habitacion_id_3)[0]
+                capacidades.append(habitacion_3['capacidad'])
 
             capacidad_total = sum(capacidades)
 
@@ -313,6 +338,9 @@ class GestionReservas(tk.Frame):
             if habitacion_seleccionada_2 != "":
                 habitacion_id_2 = habitacion_seleccionada_2.split(",")[0].split(":")[1].strip()
                 id_detalle_reserva = self.db.insert_detalle_reserva(id_reserva, habitacion_id_2, hora_actual)
+                if habitacion_seleccionada_3 != "":
+                    habitacion_id_3 = habitacion_seleccionada_3.split(",")[0].split(":")[1].strip()
+                    id_detalle_reserva = self.db.insert_detalle_reserva(id_reserva, habitacion_id_3, hora_actual)
 
             # Insertar detalle del huesped
             self.db.insert_detalle_huesped(id_reserva, id_huesped, id_detalle_reserva)
@@ -321,6 +349,8 @@ class GestionReservas(tk.Frame):
             self.db.actualizar_estado_habitacion(habitacion_id, 'Ocupada')
             if habitacion_seleccionada_2 != "":
                 self.db.actualizar_estado_habitacion(habitacion_id_2, 'Ocupada')
+                if habitacion_seleccionada_3 != "":
+                    self.db.actualizar_estado_habitacion(habitacion_id_3, 'Ocupada')
             self.cargar_reservas()
             self.limpiar_inputs()
             messagebox.showinfo("Reserva Registrada", "La reserva ha sido registrada exitosamente.")
@@ -331,6 +361,9 @@ class GestionReservas(tk.Frame):
         try:
             fecha_entrada = self.cal_entrada.get_date()
             fecha_salida = self.cal_salida.get_date()
+            if fecha_salida == fecha_entrada:
+                messagebox.showerror("Error", "La fecha de salida no puede ser igual a la fecha de entrada.")
+                return
             if fecha_salida <= fecha_entrada:
                 messagebox.showerror("Error", "La fecha de salida debe ser despues a la fecha de entrada.")
                 return
@@ -373,6 +406,9 @@ class GestionReservas(tk.Frame):
         selected_item = self.habitaciones_table.selection()[0]
         habitacion_id = self.habitaciones_table.item(selected_item, 'values')[0]
         numero_habitacion = self.habitaciones_table.item(selected_item, 'values')[1]
+        if habitacion_id in [h['id'] for h in self.habitaciones_seleccionadas]:
+            messagebox.showerror("Error", "Esta habitación ya ha sido seleccionada. Por favor, elija otra habitacion.")
+            return
         self.habitaciones_seleccionadas.append({'id': habitacion_id, 'numero': numero_habitacion})
         if Selecionar_habitacion_numero == 1:
             self.id_habitacion_entry_1.config(state='normal')
@@ -384,6 +420,11 @@ class GestionReservas(tk.Frame):
             self.id_habitacion_entry_2.delete(0, tk.END)
             self.id_habitacion_entry_2.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
             self.id_habitacion_entry_2.config(state='readonly')
+        elif Selecionar_habitacion_numero == 3:
+            self.id_habitacion_entry_3.config(state='normal')
+            self.id_habitacion_entry_3.delete(0, tk.END)
+            self.id_habitacion_entry_3.insert(0, f"ID: {habitacion_id}  Numero: {numero_habitacion}")
+            self.id_habitacion_entry_3.config(state='readonly')
 
     def limpiar_inputs(self):
         self.rut_huesped_entry.delete(0, tk.END)
@@ -397,6 +438,9 @@ class GestionReservas(tk.Frame):
         self.id_habitacion_entry_2.config(state='normal')
         self.id_habitacion_entry_2.delete(0, tk.END)
         self.id_habitacion_entry_2.config(state='readonly')
+        self.id_habitacion_entry_3.config(state='normal')
+        self.id_habitacion_entry_3.delete(0, tk.END)
+        self.id_habitacion_entry_3.config(state='readonly')
         self.combo_tipo_habitacion.set('')
         for item in self.habitaciones_table.get_children():
             self.habitaciones_table.delete(item)
