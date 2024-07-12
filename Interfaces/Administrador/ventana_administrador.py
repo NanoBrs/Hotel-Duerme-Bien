@@ -111,6 +111,21 @@ class GestionEncargados(tk.Frame):
 
 #--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
 
+    def validar_entradas(self):
+        if not self.nombre_var.get():
+            messagebox.showerror("Error", "El campo Nombre es obligatorio")
+            return False
+        if not self.apellido_var.get():
+            messagebox.showerror("Error", "El campo Apellido es obligatorio")
+            return False
+        if not self.correo_var.get():
+            messagebox.showerror("Error", "El campo Correo es obligatorio")
+            return False
+        if not self.contrasena_var.get():
+            messagebox.showerror("Error", "El campo Contraseña es obligatorio")
+            return False
+        return True
+
     def limpiar_datos(self):
         self.id_usuario_var.set("")
         self.nombre_var.set("")
@@ -132,6 +147,8 @@ class GestionEncargados(tk.Frame):
                     usuario['correo'],
                     usuario['contrasena']
                 ))
+                
+    
 
     def agregar_usuario(self):
         if not self.id_usuario_var.get():
