@@ -148,48 +148,47 @@ class GestionEncargados(tk.Frame):
                     usuario['contrasena']
                 ))
                 
-    
-
     def agregar_usuario(self):
-        if not self.id_usuario_var.get():
-            params = (
-                self.nombre_var.get(),
-                self.apellido_var.get(),
-                self.correo_var.get(),
-                self.contrasena_var.get()
-            )
-            self.dao.agregar_usuario(params)
-            self.cargar_usuarios()
-            self.limpiar_datos()
-        else:
-            messagebox.showerror("Error", "No se puede agregar un usuario que ya existe")
+        if not self.validar_entradas():
+            return
+        params = (self.nombre_var.get(), self.apellido_var.get(), self.correo_var.get(), self.contrasena_var.get())
+        self.dao.agregar_usuario(params)
+        self.limpiar_datos()
+        self.cargar_usuarios()
+        
+                
 
     def modificar_usuario(self):
-        if self.id_usuario_var.get():
-            params = (
-                self.nombre_var.get(),
-                self.apellido_var.get(),
-                self.correo_var.get(),
-                self.contrasena_var.get(),
-                self.id_usuario_var.get()
-            )
-            self.dao.modificar_usuario(params)
-            self.cargar_usuarios()
-            self.limpiar_datos()
-        else:
-            messagebox.showerror
-            
+        if not self.validar_entradas() or not self.id_usuario_var.get():
             messagebox.showerror("Error", "Debe seleccionar un usuario para modificar")
+            return
+
+        params = (self.nombre_var.get(), self.apellido_var.get(), self.correo_var.get(), self.contrasena_var.get(), self.id_usuario_var.get())
+        self.dao.modificar_usuario(params)
+        self.limpiar_datos()
+        self.cargar_usuarios()
+
+
+    def modificar_usuario(self):
+        if not self.validar_entradas() or not self.id_usuario_var.get():
+            messagebox.showerror("Error", "Debe seleccionar un usuario para modificar")
+            return
+
+        params = (self.nombre_var.get(), self.apellido_var.get(), self.correo_var.get(), self.contrasena_var.get(), self.id_usuario_var.get())
+        self.dao.modificar_usuario(params)
+        self.limpiar_datos()
+        self.cargar_usuarios()
 
     def eliminar_usuario(self):
         id_usuario = self.id_usuario_var.get()
-        if id_usuario:
-            self.dao.eliminar_usuario(id_usuario)
-            self.cargar_usuarios()
-            self.limpiar_datos()
-        else:
+        if not id_usuario:
             messagebox.showerror("Error", "Debe seleccionar un usuario para eliminar")
-
+            return
+        self.dao.eliminar_usuario(id_usuario)
+        self.limpiar_datos()
+        self.cargar_usuarios()
+        
+        
     def cargar_datos_seleccionados(self, event):
         seleccion = self.usuarios_table.selection()
         if seleccion:
