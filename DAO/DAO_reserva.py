@@ -94,24 +94,23 @@ class Database_reserva:
         query = "UPDATE habitacion SET id_estado_habitacion = (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s) WHERE id_habitacion = %s"
         self.db.execute_query(query, (nuevo_estado, id_habitacion))
 
-    def modificar_reserva(self, id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion):
-        
-        id_huesped = self.obtener_id_por_rut(nuevo_rut)
+    def modificar_reserva(self, id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion, nuevo_precio_total):
+        query = """
+        UPDATE reservas
+        SET fecha_llegada = %s, fecha_salida = %s, tipo_habitacion = %s, id_habitacion = %s, precio_total = %s
+        WHERE id_reserva = %s
+        """
+        self.db.execute_query(query, (nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion, nuevo_precio_total, id_reserva))
 
-        query_reserva = """
-        UPDATE reserva
-        SET fecha_llegada = %s, fecha_salida = %s, id_usuario = %s
-        WHERE id_reserva = %s
-        """
-        self.db.execute_query(query_reserva, (nueva_fecha_llegada, nueva_fecha_salida, id_huesped, id_reserva))
-        print(f"habitacion {nueva_id_habitacion}")
-        print(f"reserva {id_reserva}")
-        query_detalle_reserva = """
-        UPDATE detalle_reserva
-        SET id_habitacion = %s
-        WHERE id_reserva = %s
-        """
-        self.db.execute_query(query_detalle_reserva, (nueva_id_habitacion, id_reserva))
+        # También debes actualizar los detalles del huésped si el RUT cambia
+        id_huesped = self.obtener_id_por_rut(nuevo_rut)
+        if id_huesped:
+            query_detalle = """
+            UPDATE detalle_reserva
+            SET id_huesped = %s
+            WHERE id_reserva = %s
+            """
+            self.db.execute_query(query_detalle, (id_huesped, id_reserva))
         
         
     def obtener_id_habitacion_por_reserva(self, id_reserva):

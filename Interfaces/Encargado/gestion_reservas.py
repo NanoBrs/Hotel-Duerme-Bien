@@ -354,22 +354,34 @@ class GestionReservas(tk.Frame):
             nueva_fecha_salida = self.cal_salida.get_date()
             nueva_tipo_habitacion = self.combo_tipo_habitacion.get()
             nueva_id_habitacion = self.id_habitacion_entry.get()
-        if not nuevo_rut or not nueva_fecha_llegada or not nueva_fecha_salida or not nueva_id_habitacion:
-            messagebox.showerror("Error", "Todos los campos son obligatorios.")
-            return
-
-        if nueva_fecha_salida <= nueva_fecha_llegada:
-            messagebox.showerror("Error", "La fecha de salida debe ser después de la fecha de entrada.")
-            return
-
-        try:
-            self.db.modificar_reserva(id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion)
-            self.cargar_reservas()
-            self.limpiar_inputs()
-            messagebox.showinfo("Éxito", "La reserva ha sido modificada exitosamente.")
-        except Exception as e:
-            messagebox.showerror("Error", f"Hubo un error al modificar la reserva: {e}")
             
+            if not nuevo_rut or not nueva_fecha_llegada or not nueva_fecha_salida or not nueva_id_habitacion:
+                messagebox.showerror("Error", "Todos los campos son obligatorios.")
+                return
+
+            if nueva_fecha_salida <= nueva_fecha_llegada:
+                messagebox.showerror("Error", "La fecha de salida debe ser después de la fecha de entrada.")
+                return
+
+            try:
+                # Recalcular el precio total
+                noches = (datetime.strptime(nueva_fecha_salida, '%Y-%m-%d') - datetime.strptime(nueva_fecha_llegada, '%Y-%m-%d')).days
+                habitacion = self.db.cargar_habitacion_por_id(nueva_id_habitacion)
+                if not habitacion:
+                    messagebox.showerror("Error", "No se encontró la habitación seleccionada.")
+                    return
+
+                precio_noche = habitacion[0]['precio_noche']
+                nuevo_precio_total = noches * precio_noche
+
+                # Actualizar la reserva en la base de datos
+                self.db.modificar_reserva(id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion, nuevo_precio_total)
+                self.cargar_reservas()
+                self.limpiar_inputs()
+                messagebox.showinfo("Éxito", "La reserva ha sido modificada exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Hubo un error al modificar la reserva: {e}")
+
     
     def eliminar_reserva(self):
         selected_item = self.tree.focus()
@@ -387,9 +399,5 @@ class GestionReservas(tk.Frame):
                         messagebox.showerror("Error", "Hubo un error al eliminar la reserva.")
                 except Exception as e:
                     messagebox.showerror("Error", f"Hubo un error al eliminar la reserva: {e}")
-
-                        
-                        
-                
 
 
