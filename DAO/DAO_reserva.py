@@ -24,12 +24,16 @@ class Database_reserva:
 
     def cargar_reservas(self):
         query = """
-        SELECT r.id_reserva, r.fecha_llegada, r.fecha_salida, h.numero_habitacion, th.tipo AS tipo_habitacion, r.precio_total, eh.estado AS estado_habitacion
+        SELECT r.id_reserva, r.fecha_llegada, r.fecha_salida, h.numero_habitacion,
+        th.tipo AS tipo_habitacion, r.precio_total,r.id_usuario, er.estado AS estado_reserva,
+        dr.id_habitacion,dh.id_responsable,hu.rut
         FROM reserva r
         JOIN detalle_reserva dr ON r.id_reserva = dr.id_reserva
         JOIN habitacion h ON dr.id_habitacion = h.id_habitacion
         JOIN tipo_habitacion th ON h.id_tipo_habitacion = th.id_tipo_habitacion
-        JOIN estado_habitacion eh ON h.id_estado_habitacion = eh.id_estado_habitacion
+        JOIN estado_reserva er ON r.id_estado_reserva = er.id_estado_reserva
+        Join detalle_huespedes dh ON dr.id_detalle_reserva = dh.id_detalle_reserva
+        JOIN huespedes hu ON dh.id_responsable = hu.id_huesped
         """
         return self.db.fetch_all(query)
 

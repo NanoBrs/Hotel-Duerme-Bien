@@ -117,20 +117,30 @@ class GestionReservas(tk.Frame):
         tk.Button(parent, text="Eliminar Reserva", command=self.eliminar_reserva).place(x=645, y=450, width=150)
 
         # Tabla para mostrar las reservas
-        self.tree = ttk.Treeview(parent, columns=("ID Usuario", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total"),height=10, show="headings")
-        self.tree.heading("ID Usuario", text="ID Usuario")
+        self.tree = ttk.Treeview(parent, columns=("ID reserva", "Fecha de Llegada", "Fecha de Salida", "Tipo de Habitación", "Precio Total","Usuario","Estado","Habitacion","Responsable","Rut_Responsable"),height=10, show="headings")
+        self.tree.heading("ID reserva", text="ID reserva")
         self.tree.heading("Fecha de Llegada", text="Fecha de Llegada")
         self.tree.heading("Fecha de Salida", text="Fecha de Salida")
         self.tree.heading("Tipo de Habitación", text="Tipo de Habitación")
         self.tree.heading("Precio Total", text="Precio Total")
+        self.tree.heading("Usuario", text="Usuario")
+        self.tree.heading("Estado", text="Estado")
+        self.tree.heading("Habitacion", text="Habitacion")
+        self.tree.heading("Responsable", text="Responsable")
+        self.tree.heading("Rut_Responsable", text="Rut_Responsable")
         
         #columnas
-        self.tree.column('ID Usuario', width=30)
+        self.tree.column('ID reserva', width=30)
         self.tree.column('Fecha de Llegada', width=60)
         self.tree.column('Fecha de Salida', width=60)
         self.tree.column('Tipo de Habitación', width=80)
         self.tree.column('Precio Total', width=50)
-        self.tree.place(x=5, y=500, width=500, height=90)  # Ajustar la posición y tamaño de la tabla
+        self.tree.column('Usuario', width=30)
+        self.tree.column('Estado', width=60)
+        self.tree.column('Habitacion', width=50)
+        self.tree.column('Responsable', width=50)
+        self.tree.column('Rut_Responsable', width=50)
+        self.tree.place(x=5, y=500, width=950, height=90)  # Ajustar la posición y tamaño de la tabla
         # Cargar las reservas existentes
         self.cargar_reservas()
         self.tree.bind("<Double-1>", self.cargar_datos_seleccionados_reserva)
@@ -177,7 +187,7 @@ class GestionReservas(tk.Frame):
             self.tree.delete(item)
         rows = self.db.cargar_reservas()
         for row in rows:
-            self.tree.insert("", "end", values=(row['id_reserva'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total'], row['estado_habitacion']))
+            self.tree.insert("", "end", values=(row['id_reserva'], row['fecha_llegada'], row['fecha_salida'], row['tipo_habitacion'], row['precio_total'], row['id_usuario'], row['estado_reserva'], row['id_habitacion'], row['id_responsable'],row['rut']))
 
     def cargar_tipos_habitacion(self):
         rows = self.db.cargar_tipos_habitacion()
@@ -303,25 +313,18 @@ class GestionReservas(tk.Frame):
         self.id_habitacion_entry.config(state='readonly')
 
     def cargar_datos_seleccionados_reserva(self, event):
-        selected_item = self.tree.focus()
-        if selected_item:
-            valores = self.tree.item(selected_item, "values")
-            id_reserva, fecha_llegada, fecha_salida, tipo_habitacion, precio_total, estado_habitacion = valores
+        item = self.tree.selection()
+        if item:
+            reserva = self.tree.item(item, 'values')
             self.rut_huesped_entry.delete(0, tk.END)
-            self.rut_huesped_entry.insert(0, id_reserva) 
-            # Convertir las fechas a n formato aceptado por el widget Calendar
-            fecha_llegada_formateada = datetime.strptime(fecha_llegada, '%Y-%m-%d').date()
-            fecha_salida_formateada = datetime.strptime(fecha_salida, '%Y-%m-%d').date()
-            self.cal_entrada.selection_set(fecha_llegada_formateada)
-            self.cal_salida.selection_set(fecha_salida_formateada)
-            self.combo_tipo_habitacion.set(tipo_habitacion)
-            self.id_habitacion_entry.config(state=tk.NORMAL)
+            self.rut_huesped_entry.insert(0, reserva[9])
+            self.cal_entrada.selection_set(reserva[1])
+            self.cal_salida.selection_set(reserva[2])
+            self.combo_tipo_habitacion.set(reserva[3])
+            self.id_habitacion_entry.config(state='normal')
             self.id_habitacion_entry.delete(0, tk.END)
-            self.id_habitacion_entry.insert(0, tipo_habitacion) 
+            self.id_habitacion_entry.insert(0, reserva[7])
             self.id_habitacion_entry.config(state='readonly')
-
-            # Asegúrate de cargar los demás datos necesarios en el formulario
-
     
 
     def limpiar_inputs(self):
@@ -336,6 +339,8 @@ class GestionReservas(tk.Frame):
         self.combo_tipo_habitacion.set('')
         for item in self.habitaciones_table.get_children():
             self.habitaciones_table.delete(item)
+        self.cal_entrada.selection_clear()
+        self.cal_salida.selection_clear()
             
     def modificar_reserva(self):
         selected_item = self.tree.focus()
@@ -349,11 +354,21 @@ class GestionReservas(tk.Frame):
             nueva_fecha_salida = self.cal_salida.get_date()
             nueva_tipo_habitacion = self.combo_tipo_habitacion.get()
             nueva_id_habitacion = self.id_habitacion_entry.get()
-            # habitacion_seleccionada.split(",")[0].split(":")[1].strip()
-            # Realizar la actualización en la base de datos
+        if not nuevo_rut or not nueva_fecha_llegada or not nueva_fecha_salida or not nueva_id_habitacion:
+            messagebox.showerror("Error", "Todos los campos son obligatorios.")
+            return
+
+        if nueva_fecha_salida <= nueva_fecha_llegada:
+            messagebox.showerror("Error", "La fecha de salida debe ser después de la fecha de entrada.")
+            return
+
+        try:
             self.db.modificar_reserva(id_reserva, nuevo_rut, nueva_fecha_llegada, nueva_fecha_salida, nueva_tipo_habitacion, nueva_id_habitacion)
             self.cargar_reservas()
-            
+            self.limpiar_inputs()
+            messagebox.showinfo("Éxito", "La reserva ha sido modificada exitosamente.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Hubo un error al modificar la reserva: {e}")
             
     
     def eliminar_reserva(self):
