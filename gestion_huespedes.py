@@ -1,6 +1,7 @@
 import re
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 from tkinter import simpledialog, messagebox
 from DAOHuespedes import DAOHuespedes_Consultas
 
@@ -13,41 +14,34 @@ class GestionHuespedes(tk.Toplevel):
         #Instancia de DAOHuespedes
         self.db = DAOHuespedes_Consultas() 
         self.huesped_seleccionado = None
+        
         style = ttk.Style()
         style.theme_use('clam')
         
-        # Agregar imagen de fondo
+        # Cargar y establecer la imagen de fondo
         self.background_image = tk.PhotoImage(file="img/MENU2.png")
-        self.background_label = tk.Label(self, image=self.background_image)
-        self.background_label.place(relwidth=1, relheight=1)
-        
-        # Frame para el formulario de ingreso y edición
-        form_frame = ttk.Frame(self, padding=(20, 10))
-        form_frame.place(x=11.4, y=84.6, width=975.8, height=300)  # Ajustado para la mitad superior del área deseada
-
-        # Campos de entrada
-        # Primera columna
-        ttk.Label(form_frame, text="GESTION DE HUESPEDES").place(x=5, y=10)
+        background_label = tk.Label(self, image=self.background_image)
+        background_label.place(x=0, y=0, relwidth=1, relheight=1)
         
         # Frame principal
-        main_frame = ttk.Frame(self, padding = "10 10 10 10")
-        main_frame.pack(fill = tk.BOTH, expand = True)
+        main_frame = ttk.Frame(self)
+        main_frame.place(x = 11, y = 85, width = 976, height = 600)
         
         #Inputs
         input_frame = ttk.Frame(main_frame)
-        input_frame.pack(fill=tk.X, pady=(0, 10))
+        input_frame.place(x = 0, y = 0, width = 976, height = 150)
         
         self.campos = ["Nombre", "Apellido_1", "Apellido_2", "Correo Electronico", "Telefono", "RUT"]
         self.inputs = {}
         
         for i, campo in enumerate(self.campos):
-            ttk.Label(input_frame, text=f"{campo}:").grid(row=i//2, column=i%2*2, sticky="e", padx=5, pady=5)
-            self.inputs[campo] = ttk.Entry(input_frame)
-            self.inputs[campo].grid(row=i//2, column=i%2*2+1, sticky="ew", padx=5, pady=5)
+            ttk.Label(input_frame, text=f"{campo}:", style='TLabel').grid(row=i//3, column=(i%3)*2, sticky="e", padx=5, pady=5)
+            self.inputs[campo] = ttk.Entry(input_frame, style='TEntry')
+            self.inputs[campo].grid(row=i//3, column=(i%3)*2+1, sticky="ew", padx=5, pady=5)
         
         # Botones
         boton_frame = ttk.Frame(input_frame)
-        boton_frame.grid(row = 3, column = 0, columnspan = 4, sticky = "e", padx = 5, pady = 5)
+        boton_frame.grid(row=3, column=0, columnspan=6, sticky="e", padx=5, pady=5)
         
         ttk.Button(boton_frame, text = "Agregar Huésped", command = self.agregar_huesped).pack(side = tk.LEFT, padx = (0, 5))
         ttk.Button(boton_frame, text = "Modificar Datos", command = self.modificar_huesped).pack(side = tk.LEFT, padx = (0, 5))
@@ -56,7 +50,7 @@ class GestionHuespedes(tk.Toplevel):
         
         # Barra de busqueda
         buscar_frame = ttk.Frame(main_frame)
-        buscar_frame.pack(fill = tk.X, pady = (0, 10))
+        buscar_frame.place(x = 0, y = 160, width = 976, height = 30)
         ttk.Label(buscar_frame, text = "Buscar: ").pack(side = tk.LEFT, padx = 5)
         self.buscar = ttk.Entry(buscar_frame, width = 40)
         self.buscar.pack(side = tk.LEFT, padx = 5)
@@ -66,57 +60,59 @@ class GestionHuespedes(tk.Toplevel):
         
         # Lista de huéspedes
         self.tree = ttk.Treeview(main_frame, columns = ["ID"] + self.campos, show = 'headings')
+        self.tree.place(x = 0, y = 200, width = 976, height = 400)
         self.tree.heading("ID", text = "ID")
         self.tree.column("ID", width = 50)
         for col in self.campos:
             self.tree.heading(col, text = col)
             self.tree.column(col, width = 100)
-        self.tree.pack(fill = tk.BOTH, expand = True)
         
         self.tree.bind("<Double-1>", self.huesped_select)
         
-        self.cargar_datos()
-        
-        #--------------------------------------------------------- MENU -----------------------------------------------------------------
+#--------------------------------------------------------- MENU -----------------------------------------------------------------
         # Configuración de estilos
         style = ttk.Style()
         style.configure("rounded.TButton", borderwidth=2, relief="solid", background="white", padding=10, font=('Helvetica', 12))
         style.map("rounded.TButton", background=[('active', 'lightgray')])
 
         # Botón Gestionar Habitaciones
-        self.boton_gestionar_habitaciones = ttk.Button(self, text="HABITACIONES", command=self.mostrar_gestion_habitaciones, style="rounded.TButton")
+        self.boton_gestionar_habitaciones = ttk.Button(self, text="HABITACIONES", command=..., style="rounded.TButton")
         self.boton_gestionar_habitaciones.place(x=1055, y=266, width=165, height=45)
 
         # Botón Gestionar Huéspedes
-        self.boton_gestionar_huespedes = ttk.Button(self, text="HUESPEDES", command=self.mostrar_gestion_huespedes, style="rounded.TButton")
+        self.boton_gestionar_huespedes = ttk.Button(self, text="HUESPEDES", command=..., style="rounded.TButton")
         self.boton_gestionar_huespedes.place(x=1055, y=366, width=165, height=45)
 
         # Botón Gestionar Reservas
-        self.boton_gestionar_reservas = ttk.Button(self, text="RESERVAS", command=self.mostrar_gestion_reservas, style="rounded.TButton")
+        self.boton_gestionar_reservas = ttk.Button(self, text="RESERVAS", command=..., style="rounded.TButton")
         self.boton_gestionar_reservas.place(x=1055, y=466, width=165, height=45)
 
         # Botón Cerrar Sesión
-        self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=self.cerrar_sesion, style="rounded.TButton")
+        self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=..., style="rounded.TButton")
         self.boton_cerrar_sesion.place(x=1055, y=566, width=165, height=45)
 
 
     def mostrar_gestion_habitaciones(self):
         self.controlador.mostrar_frame("GestionHabitaciones")
-
+        pass
     def mostrar_gestion_huespedes(self):
         self.controlador.mostrar_frame("GestionHuespedes")
-
+        pass
     def mostrar_gestion_reservas(self):
         self.controlador.mostrar_frame("GestionReservas")
-
+        pass
     def cerrar_sesion(self):
         print("Sesión cerrada exitosamente.")
         messagebox.showinfo("Cerrar Sesion", "Sesión cerrada exitosamente.")
         self.controlador.mostrar_frame("Login")
-
+        pass
     def volver_menu_encargado(self):
         self.controlador.mostrar_frame("VentanaEncargado")
+        pass
 #--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
+        
+        self.cargar_datos()
+        
         
     def cargar_datos(self):
         for item in self.tree.get_children():
@@ -145,7 +141,7 @@ class GestionHuespedes(tk.Toplevel):
         except Exception as e:
             messagebox.showerror("Error de validación", str(e))
             return False
-
+    
     def validar_nombre(self, campo, valor):
         if len(valor) > 40:
             raise ValueError(f"{campo} debe tener máximo 40 caracteres")
