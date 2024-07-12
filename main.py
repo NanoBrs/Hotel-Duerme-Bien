@@ -37,7 +37,6 @@ class AppPrincipal(tk.Tk):
         self.mostrar_frame("Login")
         #self.mostrar_frame("Habitacion")
 
-
     def mostrar_frame(self, nombre_pagina):
         frame = self.frames[nombre_pagina]
         frame.tkraise()
