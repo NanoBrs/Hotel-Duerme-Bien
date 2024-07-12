@@ -34,8 +34,8 @@ class AppPrincipal(tk.Tk):
 
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.mostrar_frame("Login")
-        #self.mostrar_frame("Habitacion")
+        #self.mostrar_frame("Login")
+        self.mostrar_frame("GestionHuespedes")
 
     def mostrar_frame(self, nombre_pagina):
         frame = self.frames[nombre_pagina]
