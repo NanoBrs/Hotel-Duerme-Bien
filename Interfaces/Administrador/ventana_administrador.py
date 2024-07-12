@@ -184,34 +184,14 @@ class GestionEncargados(tk.Frame):
             self.correo_var.set(valores[3])
             self.contrasena_var.set(valores[4])
 
+            
     def buscar_usuario(self):
         termino_busqueda = self.buscar_var.get()
-        if termino_busqueda:
-            for item in self.usuarios_table.get_children():
-                self.usuarios_table.delete(item)
-            query = """
-            SELECT u.id_usuario, u.nombre, u.apellido, u.correo, u.contrasena
-            FROM usuario u
-            JOIN rol_usuario r ON u.id_rol_usuario = r.id_rol_usuario
-            WHERE r.id_rol_usuario = 2 AND (
-                u.nombre LIKE %s OR 
-                u.apellido LIKE %s OR 
-                u.correo LIKE %s
-            )
-            """
-            like_term = f"%{termino_busqueda}%"
-            usuarios = self.dao.db.fetch_all(query, (like_term, like_term, like_term))
-            if usuarios:
-                for usuario in usuarios:
-                    self.usuarios_table.insert('', tk.END, values=(
-                        usuario['id_usuario'],
-                        usuario['nombre'],
-                        usuario['apellido'],
-                        usuario['correo'],
-                        usuario['contrasena']
-                    ))
-        else:
-            self.cargar_usuarios()
+        resultados = self.dao.buscar_usuario(termino_busqueda)
+        self.usuarios_table.delete(*self.usuarios_table.get_children())
+        for usuario in resultados:
+            self.usuarios_table.insert('', 'end', values=(usuario['id_usuario'], usuario['nombre'], usuario['apellido'], usuario['correo'], usuario['contrasena']))
+
 
 # Código para iniciar la aplicación Tkinter
 if __name__ == "__main__":
