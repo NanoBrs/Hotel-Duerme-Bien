@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from DAO.DAOHuespedes import DAOHuespedes_Consultas  # Importa la clase DAO_huespedes desde tu archivo DAO_huespedes.py
 from PIL import Image, ImageTk
+import re
 
 class GestionHuespedes(tk.Frame):
     def __init__(self, parent, controlador):
@@ -176,7 +177,7 @@ class GestionHuespedes(tk.Frame):
                     huesped['numero'],
                     huesped['rut']
                 ))
-
+                
     def agregar_huesped(self):
         nombre = self.nombre_var.get()
         apellido1 = self.apellido1_var.get()
@@ -187,6 +188,40 @@ class GestionHuespedes(tk.Frame):
         if not nombre or not apellido1 or not correo:
             messagebox.showerror("Error", "Por favor, complete todos los campos obligatorios.")
             return
+        # Validación del campo Nombre
+        if not nombre.isalpha():
+            messagebox.showerror("Error de validación", "El nombre solo debe contener letras.")
+            return False
+
+        # Validación del campo Primer Apellido
+        if not apellido1.isalpha():
+            messagebox.showerror("Error de validación", "El primer apellido solo debe contener letras.")
+            return False
+
+        # Validación del campo Segundo Apellido
+        if not apellido2.isalpha():
+            messagebox.showerror("Error de validación", "El segundo apellido solo debe contener letras.")
+            return False
+
+        # Validación del campo Correo
+        email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(email_regex, correo):
+            messagebox.showerror("Error de validación", "El correo electrónico no es válido.")
+            return False
+
+        # Validación del campo Número de Teléfono
+        phone_regex = r'^\+?\d{10,15}$'
+        if not re.match(phone_regex, numero):
+            messagebox.showerror("Error de validación", "El número de teléfono no es válido.")
+            return False
+
+        # Validación del campo RUT
+        rut_regex = r'^\d{1,8}-[\dkK]$'
+        if not re.match(rut_regex, rut):
+            messagebox.showerror("Error de validación", "El RUT no es válido.")
+            return False
+
+            pass
         self.dao.agregar_huesped(nombre, apellido1, apellido2, correo, numero, rut)
         self.cargar_huespedes()
         self.limpiar_datos()
@@ -200,6 +235,40 @@ class GestionHuespedes(tk.Frame):
         correo = self.correo_var.get()
         numero = self.numero_var.get()
         rut = self.rut_var.get()
+
+        # Validación del campo Nombre
+        if not nombre.isalpha():
+            messagebox.showerror("Error de validación", "El nombre solo debe contener letras.")
+            return False
+
+        # Validación del campo Primer Apellido
+        if not apellido1.isalpha():
+            messagebox.showerror("Error de validación", "El primer apellido solo debe contener letras.")
+            return False
+
+        # Validación del campo Segundo Apellido
+        if not apellido2.isalpha():
+            messagebox.showerror("Error de validación", "El segundo apellido solo debe contener letras.")
+            return False
+
+        # Validación del campo Correo
+        email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(email_regex, correo):
+            messagebox.showerror("Error de validación", "El correo electrónico no es válido.")
+            return False
+
+        # Validación del campo Número de Teléfono
+        phone_regex = r'^\+?\d{10,15}$'
+        if not re.match(phone_regex, numero):
+            messagebox.showerror("Error de validación", "El número de teléfono no es válido.")
+            return False
+
+        # Validación del campo RUT
+        rut_regex = r'^\d{1,8}-[\dkK]$'
+        if not re.match(rut_regex, rut):
+            messagebox.showerror("Error de validación", "El RUT no es válido.")
+            return False
+
         if not id_huesped or not nombre or not apellido1 or not correo:
             messagebox.showerror("Error", "Por favor, complete todos los campos obligatorios.")
             return
@@ -228,4 +297,6 @@ class GestionHuespedes(tk.Frame):
         self.correo_var.set(huesped[4])
         self.numero_var.set(huesped[5])
         self.rut_var.set(huesped[6])
+
+    
 
