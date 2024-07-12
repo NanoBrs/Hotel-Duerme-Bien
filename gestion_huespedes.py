@@ -10,6 +10,7 @@ class GestionHuespedes(tk.Toplevel):
         super().__init__(master)
         self.title("Gestion de Huéspedes")
         self.geometry("1280x720")
+        self.resizable(False, False)
         
         #Instancia de DAOHuespedes
         self.db = DAOHuespedes_Consultas() 
@@ -41,12 +42,12 @@ class GestionHuespedes(tk.Toplevel):
         
         # Botones
         boton_frame = ttk.Frame(input_frame)
-        boton_frame.grid(row=3, column=0, columnspan=6, sticky="e", padx=5, pady=5)
+        boton_frame.grid(row=3, column=0, columnspan=6, sticky="w", padx=5, pady=5)
         
-        ttk.Button(boton_frame, text = "Agregar Huésped", command = self.agregar_huesped).pack(side = tk.LEFT, padx = (0, 5))
-        ttk.Button(boton_frame, text = "Modificar Datos", command = self.modificar_huesped).pack(side = tk.LEFT, padx = (0, 5))
-        ttk.Button(boton_frame, text = "Eliminar Huésped", command = self.eliminar_huesped).pack(side = tk.LEFT, padx = (0, 5))
-        ttk.Button(boton_frame, text = "Limpiar Datos", command = self.limpiar_campos).pack(side = tk.LEFT, padx = 2)
+        ttk.Button(boton_frame, text = "Agregar Huésped", command = self.agregar_huesped, width = 17).pack(side = tk.LEFT, padx = 2)
+        ttk.Button(boton_frame, text = "Modificar Datos", command = self.modificar_huesped, width = 17).pack(side = tk.LEFT, padx = 2)
+        ttk.Button(boton_frame, text = "Eliminar Huésped", command = self.eliminar_huesped, width = 17).pack(side = tk.LEFT, padx = 2)
+        ttk.Button(boton_frame, text = "Limpiar Datos", command = self.limpiar_campos, width = 17).pack(side = tk.LEFT, padx = 4)
         
         # Barra de busqueda
         buscar_frame = ttk.Frame(main_frame)
@@ -90,8 +91,20 @@ class GestionHuespedes(tk.Toplevel):
         # Botón Cerrar Sesión
         self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=..., style="rounded.TButton")
         self.boton_cerrar_sesion.place(x=1055, y=566, width=165, height=45)
-
-
+#--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
+        
+        self.cargar_datos()
+        
+        
+    def cargar_datos(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        huespedes = self.db.cargar_huespedes()
+        for huesped in huespedes:
+            self.tree.insert('', tk.END, values =  (huesped['id_huesped'], huesped['nombre'], huesped['apellido1'], 
+                                                    huesped['apellido2'], huesped['correo'], 
+                                                    huesped['numero'], huesped['rut']))
+#------------------------Funciones de la barra lateral------------------------
     def mostrar_gestion_habitaciones(self):
         self.controlador.mostrar_frame("GestionHabitaciones")
         pass
@@ -109,19 +122,8 @@ class GestionHuespedes(tk.Toplevel):
     def volver_menu_encargado(self):
         self.controlador.mostrar_frame("VentanaEncargado")
         pass
-#--------------------------------------------------------- FIN MENU -----------------------------------------------------------------
-        
-        self.cargar_datos()
-        
-        
-    def cargar_datos(self):
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        huespedes = self.db.cargar_huespedes()
-        for huesped in huespedes:
-            self.tree.insert('', tk.END, values =  (huesped['id_huesped'], huesped['nombre'], huesped['apellido1'], 
-                                                    huesped['apellido2'], huesped['correo'], 
-                                                    huesped['numero'], huesped['rut']))
+#-----------------------------------------------------------------------------  
+    
     #Validaciones
     def validar_inputs(self):
         try:
