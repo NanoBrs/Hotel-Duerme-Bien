@@ -19,7 +19,7 @@ class GestionHabitaciones(tk.Frame):
         # Variables para campos de entrada
         self.id_habitacion_var = tk.StringVar()
         self.numero_habitacion_var = tk.StringVar()
-        self.precio_noche_var = tk.DoubleVar()
+        self.precio_noche_var = tk.IntVar()
         self.camas_var = tk.IntVar()
         self.piso_var = tk.IntVar()
         self.capacidad_var = tk.IntVar()
@@ -31,29 +31,30 @@ class GestionHabitaciones(tk.Frame):
         # Frame para el formulario de ingreso y edición
         form_frame = ttk.Frame(self, padding=(20, 10))
         form_frame.place(x=11.4, y=84.6, width=975.8, height=300)  # Ajustado para la mitad superior del área deseada
+  # Función de validación para asegurar que solo se ingresen números
+        vcmd = (self.register(self.validate_number), '%P')
 
         # Campos de entrada
-        # Primera columna
         ttk.Label(form_frame, text="GESTION DE HABITACIONES").place(x=5, y=10)
         ttk.Label(form_frame, text="ID de Habitación:").place(x=5, y=40)
         ttk.Entry(form_frame, textvariable=self.id_habitacion_var, state="readonly").place(x=150, y=40)
 
         ttk.Label(form_frame, text="Número de Habitación:").place(x=5, y=70)
-        ttk.Entry(form_frame, textvariable=self.numero_habitacion_var).place(x=150, y=70)
+        ttk.Entry(form_frame, textvariable=self.numero_habitacion_var, validate='key', validatecommand=vcmd).place(x=150, y=70)
 
         ttk.Label(form_frame, text="Precio por Noche:").place(x=5, y=100)
-        ttk.Entry(form_frame, textvariable=self.precio_noche_var).place(x=150, y=100)
+        ttk.Entry(form_frame, textvariable=self.precio_noche_var, validate='key', validatecommand=vcmd).place(x=150, y=100)
 
         ttk.Label(form_frame, text="Camas:").place(x=5, y=130)
-        ttk.Entry(form_frame, textvariable=self.camas_var).place(x=150, y=130)
+        ttk.Entry(form_frame, textvariable=self.camas_var, validate='key', validatecommand=vcmd).place(x=150, y=130)
 
         ttk.Label(form_frame, text="Piso:").place(x=5, y=160)
-        ttk.Entry(form_frame, textvariable=self.piso_var).place(x=150, y=160)
+        ttk.Entry(form_frame, textvariable=self.piso_var, validate='key', validatecommand=vcmd).place(x=150, y=160)
 
-        # Segunda columna
         ttk.Label(form_frame, text="Capacidad:").place(x=355, y=40)
-        ttk.Entry(form_frame, textvariable=self.capacidad_var).place(x=475, y=40)
+        ttk.Entry(form_frame, textvariable=self.capacidad_var, validate='key', validatecommand=vcmd).place(x=475, y=40)
 
+        
         ttk.Label(form_frame, text="Tipo de Habitación:").place(x=355, y=70)
         self.tipo_habitacion_combo = ttk.Combobox(form_frame, textvariable=self.tipo_habitacion_var, state="readonly")
         self.tipo_habitacion_combo.place(x=475, y=70)
@@ -149,7 +150,9 @@ class GestionHabitaciones(tk.Frame):
         self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=self.cerrar_sesion, style="rounded.TButton")
         self.boton_cerrar_sesion.place(x=1055, y=566, width=165, height=45)
 
-
+    def validate_number(self, P):
+            return P.isdigit() or P == ""
+    
     def mostrar_gestion_habitaciones(self):
         self.controlador.mostrar_frame("GestionHabitaciones")
 
@@ -222,7 +225,43 @@ class GestionHabitaciones(tk.Frame):
                     habitacion['estado']
                 ))
 
+    
+        
     def agregar_habitacion(self):
+
+        
+        #Validamos que sean numeros enteros
+        if not self.numero_habitacion_var.get().isdigit():
+            messagebox.showerror("Error", "El número de habitación debe ser un valor entero.")
+            return
+        
+
+        if self.precio_noche_var.get() <= 0:
+            messagebox.showerror("Error", "El precio por noche debe ser mayor a cero.")
+            return
+        if self.camas_var.get() < 1:
+            messagebox.showerror("Error", "El número de camas debe ser mayor o igual a uno.")
+            return
+        if self.piso_var.get() < 1:
+            messagebox.showerror("Error", "El piso debe ser mayor o igual a uno.")
+            return
+        if self.capacidad_var.get() < 1:
+            messagebox.showerror("Error", "La capacidad debe ser mayor o igual a uno.")
+            return
+        if not self.tipo_habitacion_var.get():
+            messagebox.showerror("Error", "Debe seleccionar un tipo de habitación.")
+            return
+        if not self.orientacion_var.get():
+            messagebox.showerror("Error", "Debe seleccionar una orientación.")
+            return
+        if not self.estado_habitacion_var.get():
+            messagebox.showerror("Error", "Debe seleccionar un estado de habitación.")
+            return
+        
+        if self.capacidad_var.get() <= self.camas_var.get():
+            messagebox.showerror("Error", "La capacidad debe ser igual o mayor a la cantidad de camas.")
+            return
+        
         if not self.id_habitacion_var.get():
             params = (
                 self.numero_habitacion_var.get(),
@@ -256,6 +295,37 @@ class GestionHabitaciones(tk.Frame):
             self.numero_habitacion_var.get(),
             self.id_habitacion_var.get()
         )
+         #Validamos que sean numeros enteros
+        if not self.numero_habitacion_var.get().isdigit():
+            messagebox.showerror("Error", "El número de habitación debe ser un valor entero.")
+            return
+        
+
+        if self.precio_noche_var.get() <= 0:
+            messagebox.showerror("Error", "El precio por noche debe ser mayor a cero.")
+            return
+        if self.camas_var.get() < 1:
+            messagebox.showerror("Error", "El número de camas debe ser mayor o igual a uno.")
+            return
+        if self.piso_var.get() < 1:
+            messagebox.showerror("Error", "El piso debe ser mayor o igual a uno.")
+            return
+        if self.capacidad_var.get() < 1:
+            messagebox.showerror("Error", "La capacidad debe ser mayor o igual a uno.")
+            return
+        if not self.tipo_habitacion_var.get():
+            messagebox.showerror("Error", "Debe seleccionar un tipo de habitación.")
+            return
+        if not self.orientacion_var.get():
+            messagebox.showerror("Error", "Debe seleccionar una orientación.")
+            return
+        if not self.estado_habitacion_var.get():
+            messagebox.showerror("Error", "Debe seleccionar un estado de habitación.")
+            return
+        
+        if self.capacidad_var.get() <= self.camas_var.get():
+            messagebox.showerror("Error", "La capacidad debe ser igual o mayor a la cantidad de camas.")
+            return
         
         self.dao.modificar_habitacion(params)
         self.cargar_habitaciones()

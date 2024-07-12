@@ -46,6 +46,8 @@ class DAO_habitaciones:
         (SELECT id_orientacion FROM orientacion WHERE orientacion = %s), 
         (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s))
         """
+        mensaje = f"Se ha agregado correctamente la habitación"
+        messagebox.showinfo("Información", mensaje)
         return self.db.execute_query(query, params)
 
     def modificar_habitacion(self, params):
