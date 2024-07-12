@@ -74,9 +74,10 @@ class DAO_habitaciones:
 
     def eliminar_habitacion(self, id):
         query = "DELETE FROM habitacion WHERE id_habitacion = %s"
+        
         try:
-            print(self.db.execute_query(query, id))
-            messagebox.showwarning("Eliminado", "Se eliminó la habitación de id:",id)
+            mensaje = f"Se eliminó la habitación de id: {id}"
+            messagebox.showinfo("Eliminado", mensaje)
         except:
             messagebox.showerror("Error", "No se pudo eliminar la habitación")
         return self.db.execute_query(query, id)

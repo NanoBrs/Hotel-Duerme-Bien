@@ -63,10 +63,10 @@ class GestionHuespedes(tk.Frame):
         ttk.Button(form_frame, text="Borrar Filtros", command=self.cargar_huespedes).place(x=235, y=210)
 
         # Botones CRUD
-        ttk.Button(form_frame, text="Agregar", command=self.agregar_huesped).place(x=355, y=160)
-        ttk.Button(form_frame, text="Modificar", command=self.modificar_huesped).place(x=445, y=160)
-        ttk.Button(form_frame, text="Eliminar", command=self.eliminar_huesped).place(x=535, y=160)
-        ttk.Button(form_frame, text="Limpiar Datos", command=self.limpiar_datos).place(x=625, y=160)
+        ttk.Button(form_frame, text="Agregar", command=self.agregar_huesped).place(x=355, y=100)
+        ttk.Button(form_frame, text="Modificar", command=self.modificar_huesped).place(x=445, y=100)
+        ttk.Button(form_frame, text="Eliminar", command=self.eliminar_huesped).place(x=535, y=100)
+        ttk.Button(form_frame, text="Limpiar Datos", command=self.limpiar_datos).place(x=625, y=100)
 
         # Frame para la tabla de huéspedes
         table_frame = ttk.Frame(self, padding=(10, 5))

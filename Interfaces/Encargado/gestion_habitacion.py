@@ -263,7 +263,11 @@ class GestionHabitaciones(tk.Frame):
 
     def eliminar_habitacion(self):
         params = (self.id_habitacion_var.get(),)
-        self.dao.eliminar_habitacion(params)
+        estado = self.estado_habitacion_var.get() #Se verifica que el estado de habitación se guarde en eliminar
+        if estado == "Ocupada":
+            messagebox.showerror("Error", "No es posible eliminar habitaciones ocupadas.")
+        else:
+            self.dao.eliminar_habitacion(params)
         self.cargar_habitaciones()
 
     def cargar_datos_seleccionados(self, event):
