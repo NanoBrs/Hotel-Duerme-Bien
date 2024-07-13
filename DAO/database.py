@@ -57,11 +57,12 @@ class Database:
             return None
         finally:
             self.disconnect_from_db()
-            
+
     def fetch_all(self, query, params=None):
         try:
             if not self.connect_to_db():
                 return []
+            
             self.cursor.execute(query, params)
             return self.cursor.fetchall()
         except Error as e:

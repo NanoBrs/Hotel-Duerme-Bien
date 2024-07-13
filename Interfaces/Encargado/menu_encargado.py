@@ -39,6 +39,9 @@ class MenuEncargado(tk.Frame):
         # Botón Cerrar Sesión
         self.boton_cerrar_sesion = ttk.Button(self, text="CERRAR SESIÓN", command=self.cerrar_sesion, style="rounded.TButton")
         self.boton_cerrar_sesion.place(x=1055, y=566, width=165, height=45)
+        
+
+
 
     def mostrar_gestion_habitaciones(self):
         self.controlador.mostrar_frame("GestionHabitaciones")
@@ -50,13 +53,6 @@ class MenuEncargado(tk.Frame):
         self.controlador.mostrar_frame("GestionReservas")
 
     def cerrar_sesion(self):
-        # Aquí deberías implementar la lógica para cerrar la sesión actual
-        # Puedes mostrar un mensaje, limpiar datos de sesión, etc.
         print("Sesión cerrada exitosamente.")
         messagebox.showinfo("Cerrar Sesion", "Sesión cerrada exitosamente.")
-        # Luego, probablemente quieras volver a la ventana de inicio de sesión o cerrar la aplicación
-        # Por ejemplo:
-        self.controlador.mostrar_frame("Login")  # Cambiar a la ventana de inicio de sesión
-        # O si deseas cerrar la aplicación:
-        # self.controlador.quit()  # Cierra el bucle principal de Tkinter
-        # self.controlador.destroy()  # Destruye la ventana principal
+        self.controlador.mostrar_frame("Login")  

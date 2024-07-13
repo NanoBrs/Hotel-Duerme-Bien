@@ -53,3 +53,14 @@ class DAO_usuarios:
             return True
         else:
             return False
+    
+    def buscar_usuario(self, termino_busqueda):
+        query = """
+        SELECT u.id_usuario, u.nombre, u.apellido, u.correo, u.contrasena
+        FROM usuario u
+        JOIN rol_usuario r ON u.id_rol_usuario = r.id_rol_usuario
+        WHERE r.id_rol_usuario = 2
+        AND (u.nombre LIKE %s OR u.apellido LIKE %s OR u.correo LIKE %s)
+        """
+        params = (f'%{termino_busqueda}%', f'%{termino_busqueda}%', f'%{termino_busqueda}%')
+        return self.db.fetch_all(query, params)

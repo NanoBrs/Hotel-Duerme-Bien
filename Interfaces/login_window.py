@@ -52,14 +52,14 @@ class Login(tk.Frame):
         self.login_button.place(x=301.5, y=460.9)
     
     def on_login(self):
-        user = self.entry_user.get()
+        email = self.entry_user.get()
         password = self.entry_password.get()
         
-        if not user or not password:
-            messagebox.showwarning("Campos requeridos", "Por favor complete usuario y contraseña.")
+        if not email or not password:
+            messagebox.showwarning("Campos requeridos", "Por favor complete Correo y contraseña.")
             return
         
-        user_data = self.login_dao.get_user(user, password)
+        user_data = self.login_dao.get_user_by_email(email, password)
         
         self.entry_user.delete(0, tk.END)
         self.entry_password.delete(0, tk.END)
