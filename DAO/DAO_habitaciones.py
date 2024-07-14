@@ -46,6 +46,8 @@ class DAO_habitaciones:
         (SELECT id_orientacion FROM orientacion WHERE orientacion = %s), 
         (SELECT id_estado_habitacion FROM estado_habitacion WHERE estado = %s))
         """
+        mensaje = f"Se ha agregado correctamente la habitación"
+        messagebox.showinfo("Información", mensaje)
         return self.db.execute_query(query, params)
 
     def modificar_habitacion(self, params):
@@ -74,9 +76,10 @@ class DAO_habitaciones:
 
     def eliminar_habitacion(self, id):
         query = "DELETE FROM habitacion WHERE id_habitacion = %s"
+        
         try:
-            print(self.db.execute_query(query, id))
-            messagebox.showwarning("Eliminado", "Se eliminó la habitación de id:",id)
+            mensaje = f"Se eliminó la habitación de id: {id}"
+            messagebox.showinfo("Eliminado", mensaje)
         except:
             messagebox.showerror("Error", "No se pudo eliminar la habitación")
         return self.db.execute_query(query, id)

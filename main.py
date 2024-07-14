@@ -1,12 +1,20 @@
 import tkinter as tk
-from Interfaces.login_window import Login
-from Interfaces.Encargado.menu_encargado import MenuEncargado
-from Interfaces.Encargado.gestion_habitacion import GestionHabitaciones
-from Interfaces.Encargado.gestion_huespedes import GestionHuespedes
-from Interfaces.Encargado.gestion_reservas import GestionReservas
-from Interfaces.Administrador.ventana_administrador import GestionEncargados
+from login_window import Login
+from menu_encargado import MenuEncargado
+from gestion_habitacion import GestionHabitaciones
+from gestion_huespedes import GestionHuespedes
+from gestion_reservas import GestionReservas
+from ventana_administrador import GestionEncargados
 from tkinter import PhotoImage
+import os
+import sys
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class AppPrincipal(tk.Tk):
     def __init__(self):
@@ -17,8 +25,11 @@ class AppPrincipal(tk.Tk):
         self.resizable(False, False)
 
         # Establece el ícono de la ventana y la barra de tareas usando un archivo .ico
-        self.icon_image = PhotoImage(file="img/icono.png")
-        self.iconphoto(True, self.icon_image)
+        try:
+            self.icon_image = PhotoImage(file=resource_path("icono.png"))
+            self.iconphoto(True, self.icon_image)
+        except: 
+            print("Error al cargar el icono")
 
         contenedor = tk.Frame(self)
         contenedor.pack(side="top", fill="both", expand=True)
@@ -35,12 +46,17 @@ class AppPrincipal(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.mostrar_frame("Login")
-        #self.mostrar_frame("Habitacion")
+        #self.mostrar_frame("GestionHuespedes")
 
     def mostrar_frame(self, nombre_pagina):
         frame = self.frames[nombre_pagina]
         frame.tkraise()
 
 if __name__ == "__main__":
-    app = AppPrincipal()
-    app.mainloop()
+    try:
+        app = AppPrincipal()
+        app.mainloop()
+        
+    except Exception as e:
+        print(f"Ocurrió un error: {e}")
+        input("Presiona Enter para salir...")
