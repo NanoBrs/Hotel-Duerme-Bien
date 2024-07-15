@@ -1,11 +1,6 @@
 from DAO.database import Database
 from datetime import date
 from tkinter import messagebox
-
-class Database_reserva:
-    def __init__(self):
-        self.db = Database()
-
 class Database_reserva:
     def __init__(self):
         self.db = Database()
@@ -40,6 +35,7 @@ class Database_reserva:
         JOIN huespedes hu ON dh.id_responsable = hu.id_huesped
         """
         return self.db.fetch_all(query)
+
     def cargar_tipos_habitacion(self):
         query = "SELECT id_tipo_habitacion, tipo FROM tipo_habitacion"
         return self.db.fetch_all(query)
@@ -58,7 +54,7 @@ class Database_reserva:
         self.db.execute_query(query_reserva, (entrada, salida, id_usuario, id_estado_reserva, precio_total))
         id_reserva = self.db.cursor.lastrowid
         return id_reserva
-    
+
     def insert_detalle_reserva(self, id_reserva, id_habitacion, hora):
         query = "INSERT INTO detalle_reserva (id_reserva, id_habitacion, hora) VALUES (%s, %s, %s)"
         self.db.execute_query(query, (id_reserva, id_habitacion, hora))
@@ -78,11 +74,11 @@ class Database_reserva:
         JOIN estado_habitacion eh ON h.id_estado_habitacion = eh.id_estado_habitacion
         WHERE h.id_habitacion = %s
         """
-        return self.db.fetch_all(query, (id_habitacion,))
+        return self.db.fetch_all(query, (id_habitacion))
     
     def cargar_capacidad_habitacion_por_id(self, id_habitacion):
         query = """
-        SELECT h.capacidad
+        SELECT h.capacidad,h.precio_noche
         FROM habitacion h
         WHERE h.id_habitacion = %s
         """
@@ -141,7 +137,7 @@ class Database_reserva:
             self.actualizar_estado_habitacion(id_habitacion,'Disponible')
 
             if result:
-                messagebox.showwarning("Eliminado", f"Se elimino la reserva con id: {id_reserva} y la habitación paso a estar Disponible.")
+                messagebox.showwarning("Eliminado", f"Se elimino la reserva con id: {id_reserva} y la habitaciÃ³n paso a estar Disponible.")
             else:
                 messagebox.showerror("Error", "No se pudo eliminar la reserva.")
 
@@ -181,5 +177,4 @@ class Database_reserva:
             WHERE id_reserva = %s 
             """
             self.db.execute_query(query, (id_habitacion, hora_actual, id_reserva))
-
 
