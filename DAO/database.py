@@ -15,7 +15,7 @@ class Database:
                 password='contraseña'
             )
             if self.conn.is_connected():
-                print("Conexión exitosa")
+                #print("Conexión exitosa")
                 self.cursor = self.conn.cursor(dictionary=True)
                 return True
         except Error as e:
@@ -27,7 +27,7 @@ class Database:
             if self.conn is not None and self.conn.is_connected():
                 self.cursor.close()
                 self.conn.close()
-                print("Desconexión exitosa")
+                #print("Desconexión exitosa")
         except Error as e:
             print(f"Error al desconectar de MySQL: {e}")
 
